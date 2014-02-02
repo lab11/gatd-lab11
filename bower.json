@@ -18,7 +18,8 @@
 	"jquery.ui": ">= 1.10.4",
 	"socket.io-client": ">= 0.8.7",
 	"underscore": ">= 1.5.2",
-	"jsIP": ">= 0.1.0",
-	"leaflet": ">= 0.7.1"
+	"jsIP": ">= 0.1.2",
+	"leaflet": ">= 0.7.1",
+	"bignumber.js": ">= 1.3.0"
   }
 }

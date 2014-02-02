@@ -1,10 +1,11 @@
 <html>
 <head>
-	<script src="js/socket.io-0.8.7.js"></script>
-	<script src="js/jquery-1.7.1.min.js"></script>
-	<script src="js/jsIP.js"></script>
-	<script>WEB_SOCKET_SWF_LOCATION='misc/WebSocketMain.swf'</script>
-	<title>test</title>
+	<script src="bower_components/socket.io-client/dist/socket.io.min.js"></script>
+	<script src="bower_components/jquery/jquery.min.js"></script>
+	<script src="bower_components/jsIP/jsIP.js"></script>
+	<script src="bower_components/bignumber.js/bignumber.min.js"></script>
+	<script>WEB_SOCKET_SWF_LOCATION='bower_components/socket.io-client/dist/WebSocketMain.swf'</script>
+	<title>Real-time monitor of shed commits</title>
 
 </head>
 
@@ -14,11 +15,10 @@
 	<script>
 
 	var socket;
-	var jsIP = require('./jsIP');
 
 	function display_data (data) {
 		out = "<div>";
-		out += "<span>Address: " + jsIP(parseInt(data['address'])).pureStr() + "</span>";
+		out += "<span>Address: " + IP("0x"+BigNumber(data['address']).toString(16)).pureStr() + "</span>";
 		out += "<ul>";
 		for (var key in data) {
 			if (key != 'address' && key != '_id' && key != 'profile_id') {
@@ -51,7 +51,6 @@
 
 	}
 	</script>
-
 
 	<div id="stream"></div>
 </body>

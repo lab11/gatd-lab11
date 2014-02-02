@@ -6,7 +6,6 @@
     "Brad Campbell <bradjc5@gmail.com>"
   ],
   "description": "Versatile data collection service that supports real time streaming and data archival.",
-  "main": "?",
   "keywords": [
     "data"
   ],

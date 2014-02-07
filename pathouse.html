@@ -50,6 +50,7 @@
 	var location_str3 = 'USA|Michigan|Ann Arbor|1885 Fuller|Porch';
 	var location_str4 = 'USA|Michigan|Ann Arbor|1885 Fuller|Dining Room';
 	var location_str5 = 'USA|Michigan|Ann Arbor|1885 Fuller|Laundry Room';
+	var location_str6 = 'USA|Michigan|Ann Arbor|1885 Fuller'
 
 	onload = function() {
 		socket = io.connect('inductor.eecs.umich.edu:8082/stream');
@@ -60,9 +61,11 @@
 			                                               location_str2,
 			                                               location_str3,
 			                                               location_str4,
-			                                               location_str5]},
+			                                               location_str5,
+			                                               location_str6,]},
 			                      '$or': [{'type': 'coilcube_freq'},
-			                              {'type': {'$exists': false}}],
+			                              {'type': {'$exists': false}},
+			                              {'type': 'local_aggregate'}],
 			                      'time': 300000}
 			              );
 		});
@@ -79,13 +82,23 @@
 				fixup_index();
 				add_to_graph(g2, data['ccid_mac'], data['time'], data['freq'], color);
 			} else if (data['profile_id'] == WUP_PID) {
-				add_to_key(undefined,
-					data['ccid_mac'],
-					data['description'],
-					data['location_str'],
-					-1,
-					color);
-				add_to_graph(g1, data['wattsupid'], data['time'], data['watts'], color, 1);
+				if ('wattsupid' in data) {
+					add_to_key(undefined,
+						data['ccid_mac'],
+						data['description'],
+						data['location_str'],
+						-1,
+						color);
+					add_to_graph(g1, data['wattsupid'], data['time'], data['watts'], color, 1);
+				} else {
+					add_to_key(undefined,
+						'aggregate',
+						data['description'],
+						data['location_str'],
+						-1,
+						color);
+					add_to_graph(g1, 'aggregate', data['time'], data['watts'], color, 1);
+				}
 			}
 		});
 

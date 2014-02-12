@@ -75,6 +75,23 @@ function x_format(val, axis) {
            leftPad(sec) + " " + ((isAM)?"AM":"PM");
 }
 
+function x_format_days(val, axis) {
+	d = new Date(val);
+
+	var hours = d.getHours();
+	var isAM = hours < 12;
+	if (hours > 12) {
+		var hours12 = hours - 12;
+	} else if (hours == 0) {
+		var hours12 = 12;
+	} else {
+		var hours12 = hours;
+	}
+
+	return (d.getMonth()+1) + '/' + d.getDate() +
+		'\n' + hours12 + ((isAM)?"AM":"PM");
+}
+
 function get_color (uid) {
 	if (!(uid in node_mapping)) {
 		//node_mapping[uid] = get_random_color();

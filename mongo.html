@@ -41,8 +41,10 @@
 		});
 
 		socket_cc.on('data', function (data) {
+			console.log(data['time']);
 			MIN_INTERVAL_MS=0;
 			add_to_graph(g, 0, data['time'], data['dataSize']/1073741824, '#000000');
+			add_to_graph(g, 1, data['time'], data['objects']/10000000, '#0000ff');
 		});
 
 		g = $.grapher($("#graph"),

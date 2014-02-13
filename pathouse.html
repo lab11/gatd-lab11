@@ -44,27 +44,16 @@
 
 	var CC_PID = '7aiOPJapXF';
 	var WUP_PID = 'YWUr2G8AZP';
+	var TED_PID = 'nMR0xcWInF';
 	var socket;
-	var location_str1 = 'USA|Michigan|Ann Arbor|1885 Fuller|Kitchen';
-	var location_str2 = 'USA|Michigan|Ann Arbor|1885 Fuller|Living Room';
-	var location_str3 = 'USA|Michigan|Ann Arbor|1885 Fuller|Porch';
-	var location_str4 = 'USA|Michigan|Ann Arbor|1885 Fuller|Dining Room';
-	var location_str5 = 'USA|Michigan|Ann Arbor|1885 Fuller|Laundry Room';
-	var location_str6 = 'USA|Michigan|Ann Arbor|1885 Fuller'
-	var location_str7 = 'USA|Michigan|Ann Arbor|1885 Fuller|Will\'s Bedroom';
+	var location_regex = '^USA\\|Michigan\\|Ann Arbor\\|1885 Fuller.*';
 
 	onload = function() {
 		socket = io.connect('inductor.eecs.umich.edu:8082/stream');
 		socket.on('connect', function (data) {
-			socket.emit('query', {'profile_id': {'$in': [CC_PID, WUP_PID]},
+			socket.emit('query', {'profile_id': {'$in': [CC_PID, WUP_PID, TED_PID]},
 			                      'description': {'$exists': true},
-			                      'location_str': {'$in': [location_str1,
-			                                               location_str2,
-			                                               location_str3,
-			                                               location_str4,
-			                                               location_str5,
-			                                               location_str6,
-			                                               location_str7,]},
+			                      'location_str': {'$regex': location_regex, '$options': 'i'},
 			                      '$or': [{'type': 'coilcube_freq'},
 			                              {'type': {'$exists': false}},
 			                              {'type': 'local_aggregate'}],
@@ -73,7 +62,11 @@
 		});
 
 		socket.on('data', function (data) {
-			var color = get_color(data['ccid_mac'])
+			if ('ccid_mac' in data) {
+				var color = get_color(data['ccid_mac']);
+			} else {
+				var color = get_color(data['description']);
+			}
 			if (data['profile_id'] == CC_PID) {
 				add_to_key(undefined,
 					data['ccid_mac'],
@@ -101,6 +94,14 @@
 						color);
 					add_to_graph(g1, 'aggregate', data['time'], data['watts'], color, 1);
 				}
+			} else if (data['profile_id'] == TED_PID) {
+				add_to_key(undefined,
+					'ted',
+					data['description'],
+					data['location_str'],
+					-1,
+					color);
+				add_to_graph(g1, 'ted', data['time'], data['watts'], color, 1);
 			}
 		});
 

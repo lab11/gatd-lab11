@@ -40,7 +40,7 @@
 	onload = function() {
 		socket = io.connect('inductor.eecs.umich.edu:8080/stream');
 		socket.on('connect', function (data) {
-			socket.emit('query', {'profile_id': '7aiOPJapXF', 'type': 'coilcube_freq'});
+			socket.emit('query', {'profile_id': '7aiOPJapXF', '_processor_freq':'last'});
 		});
 
 		socket.on('data', function (data) {

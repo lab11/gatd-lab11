@@ -33,7 +33,7 @@
 	var socket_cc;
 
 	onload = function() {
-		socket_cc = io.connect('inductor.eecs.umich.edu:8082/stream');
+		socket_cc = io.connect('inductor.eecs.umich.edu:8083/stream');
 		socket_cc.on('connect', function (data) {
 			socket_cc.emit('query', {'profile_id': PID,
 			                         'time': 604800000}
@@ -43,8 +43,8 @@
 		socket_cc.on('data', function (data) {
 			console.log(data['time']);
 			MIN_INTERVAL_MS=0;
-			add_to_graph(g, 0, data['time'], data['dataSize']/1073741824, '#000000');
-			add_to_graph(g, 1, data['time'], data['objects']/10000000, '#0000ff');
+			add_to_graph(g, 0, data['time'], data['dataSize']/1073741824, '#000000',1);
+			add_to_graph(g, 1, data['time'], data['objects']/10000000, '#0000ff',1);
 		});
 
 		g = $.grapher($("#graph"),

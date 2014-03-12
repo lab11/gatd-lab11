@@ -17,5 +17,5 @@ yourself.
 
     cd bower_components/leaflet
     npm install
-    npm install -g jake
+    sudo npm install -g jake
     jake

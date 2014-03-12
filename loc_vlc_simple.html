@@ -1,0 +1,127 @@
+<html>
+<head>
+	<script src="bower_components/socket.io-client/dist/socket.io.min.js"></script>
+	<script src="bower_components/jquery/dist/jquery.min.js"></script>
+	<script src="js/jquery.flot.custom-0.8.2.js"></script>
+	<script src="bower_components/flot/jquery.flot.time.js"></script>
+	<script src="bower_components/underscore/underscore.js"></script>
+	<script src="js/jquery.grapher.js"></script>
+	<script src="js/gatd_graph.js"></script>
+	<script>WEB_SOCKET_SWF_LOCATION='bower_components/socket.io-client/dist/WebSocketMain.swf'</script>
+
+	<link href="css/gatd_graph.css" media="all" rel="stylesheet" type="text/css" />
+
+	<title>VLC Location - Simple Grid</title>
+</head>
+
+<body>
+	<div id="headerBar">
+		<div style="width:1000px; margin:0 auto; text-align:center;">
+			<div style="float:left"><img src="images/BlockM-rball.png" height="50px" style="margin-top:5px;" /></div>
+			<div style="float:left; padding:6px 0 0 350px;">VLC Location - Simple Grid</div>
+		</div>
+	</div>
+	<div id="body">
+		<div>
+			<canvas id="grid_canvas" width="900" height="900"></canvas>
+		</div>
+		<div id="key" class="box_shadow key">
+			<table id="key_table">
+				<thead><tr>
+						<th>Index</th>
+						<th>ID</th>
+						<th>Description</th>
+						<th>Location</th>
+						<th>Time</th>
+				</tr></thead>
+				<tbody id="key_table_tbody"></tbody>
+			</table>
+		</div>
+	</div>
+
+	<script>
+	var canvas = document.getElementById('grid_canvas');
+	var context = canvas.getContext('2d');
+
+	// Draw 1" grid
+	context.strokeStyle = '#ccc';
+	//context.setLineDash([2,3]);
+	for (r in _.range(91)) {
+		i = r*10;
+		context.beginPath();
+		context.moveTo(0, i);
+		context.lineTo(900, i);
+		context.stroke();
+
+		context.beginPath();
+		context.moveTo(i, 0);
+		context.lineTo(i, 900);
+		context.stroke();
+	}
+
+	// Draw Transmitter Box
+	context.strokeStyle = '#000';
+
+
+	for (var off=-160; off<=160; off += 320) {
+		context.beginPath();
+		context.moveTo(450+off, 450+off);
+		context.lineTo(450-off, 450+off);
+		context.stroke();
+		context.beginPath();
+		context.moveTo(450+off, 450+off);
+		context.lineTo(450+off, 450-off);
+		context.stroke();
+	}
+
+	// Draw Transmitters
+	context.strokeStyle = "#00f";
+
+	context.beginPath();
+	context.arc(450, 450, 15, 0, 2 * Math.PI, false);
+	context.stroke();
+	for (var x_off=-150; x_off<=150; x_off += 300) {
+		for (var y_off=-140; y_off<=140; y_off += 280) {
+			context.beginPath();
+			context.arc(450+x_off, 450+y_off, 14, 0, 2 * Math.PI, false);
+			context.stroke();
+		}
+	}
+
+	var LOC_VLC_PID = 'WEgwAGyc9N';
+	var socket_loc;
+
+	function draw_loc(loc) {
+		var canvas = document.getElementById('grid_canvas');
+		var context = canvas.getContext('2d');
+		var x = ((loc[0] / 2.54) * 10) + 450;
+		var y = ((loc[1] / 2.54) * 10) + 450;
+		var z = loc[2];
+		context.beginPath();
+		console.log('Drawing loc at (' + x + ',' + y + ',' + z + ')');
+		context.arc(x, y, 5, 0, 2 * Math.PI, false);
+		context.fillStyle = '#faa';
+		context.fill();
+		context.lineWidth = 2;
+		context.strokeStyle = '#f44' //"#f66";
+		context.stroke();
+	}
+
+	onload = function() {
+		socket_loc = io.connect('inductor.eecs.umich.edu:8082/stream');
+		socket_loc.on('connect', function (data) {
+			socket_loc.emit('query', {'profile_id': LOC_VLC_PID,
+				'time': 60000}
+				);
+		});
+
+		socket_loc.on('data', function (data) {
+			//var color = get_color(data['ccid_mac'])
+			var loc = data['rx_location'];
+			draw_loc(loc);
+		});
+	}
+	</script>
+
+</body>
+</html>

@@ -67,8 +67,8 @@
 	// Draw Transmitter Box
 	context.strokeStyle = '#000';
 
-
-	for (var off=-160; off<=160; off += 320) {
+	// old size 160, 160, 320
+	for (var off=-190; off<=190; off += 380) {
 		context.beginPath();
 		context.moveTo(450+off, 450+off);
 		context.lineTo(450-off, 450+off);
@@ -93,6 +93,25 @@
 		}
 	}
 
+	// Draw train track
+	context.strokeStyle = "#080";
+
+	context.beginPath();
+	context.arc(450-43.5, 450, 117.5, Math.PI*.5, 1.5*Math.PI, false);
+	context.stroke();
+	context.beginPath();
+	context.arc(450+43.5, 450, 117.5, Math.PI*1.5, .5*Math.PI, false);
+	context.stroke();
+
+	context.beginPath();
+	context.moveTo(450-43.5, 450+117.5);
+	context.lineTo(450+43.5, 450+117.5);
+	context.stroke()
+	context.beginPath();
+	context.moveTo(450-43.5, 450-117.5);
+	context.lineTo(450+43.5, 450-117.5);
+	context.stroke()
+
 	var LOC_VLC_PID = 'WEgwAGyc9N';
 	var socket_loc;
 
@@ -100,9 +119,9 @@
 	var HEIGHT = 900;
 
 	var loc_hist = Array();
-	var age_out = 15000; //1000 * 60 * 5;
+	var age_out = 25000; //1000 * 60 * 5;
 
-	function draw_loc(context, loc, age) {
+	function draw_loc(context, loc, rot, age) {
 		var x = ((loc[0] / 2.54) * 10) + 450;
 		var y = ((loc[1] / 2.54) * 10) + 450;
 		var z = loc[2];
@@ -116,6 +135,16 @@
 		context.fill();
 		context.lineWidth = 2;
 		context.stroke();
+
+		context.strokeStyle = '#00f' //"#f66";
+		context.beginPath();
+		context.moveTo(x, y)
+		console.log(rot);
+		var x_rot = rot[0][0] * 30;
+		var y_rot = rot[0][1] * 30;
+		console.log('x_rot ' + x_rot + ' y_rot ' + y_rot);
+		context.lineTo(x-x_rot, y+y_rot)
+		context.stroke()
 	}
 
 	function draw_all_locs() {
@@ -133,12 +162,13 @@
 		}
 		for (var i=0; i < loc_hist.length; i++) {
 			var loc = loc_hist[i]['rx_location'];
+			var rot = loc_hist[i]['rx_rotation'];
 			var age = Math.max(1, Date.now() - loc_hist[i]['time']);
-			draw_loc(dots_ctx, loc, age);
+			draw_loc(dots_ctx, loc, rot, age);
 		}
 	}
 
-	var updater_interval = setInterval(function(){draw_all_locs()}, 100);
+	var updater_interval = setInterval(function(){draw_all_locs()}, 2000);
 
 	onload = function() {
 		socket_loc = io.connect('inductor.eecs.umich.edu:8082/stream');

@@ -23,8 +23,12 @@
 	</div>
 	<div id="body">
 		<div>
-			<canvas id="grid_canvas" width="900" height="900"></canvas>
+			<canvas id="grid_canvas" width="900" height="900"
+				style="z-index: 1; position:absolute; left:400px; top:60px;"></canvas>
+			<canvas id="dots_canvas" width="900" height="900"
+				style="z-index: 2; position:absolute; left:400px; top:60px;"></canvas>
 		</div>
+		<!--
 		<div id="key" class="box_shadow key">
 			<table id="key_table">
 				<thead><tr>
@@ -37,11 +41,12 @@
 				<tbody id="key_table_tbody"></tbody>
 			</table>
 		</div>
+		-->
 	</div>
 
 	<script>
-	var canvas = document.getElementById('grid_canvas');
-	var context = canvas.getContext('2d');
+	var grid_canvas = document.getElementById('grid_canvas');
+	var context = grid_canvas.getContext('2d');
 
 	// Draw 1" grid
 	context.strokeStyle = '#ccc';
@@ -91,21 +96,49 @@
 	var LOC_VLC_PID = 'WEgwAGyc9N';
 	var socket_loc;
 
-	function draw_loc(loc) {
-		var canvas = document.getElementById('grid_canvas');
-		var context = canvas.getContext('2d');
+	var WIDTH = 900;
+	var HEIGHT = 900;
+
+	var loc_hist = Array();
+	var age_out = 15000; //1000 * 60 * 5;
+
+	function draw_loc(context, loc, age) {
 		var x = ((loc[0] / 2.54) * 10) + 450;
 		var y = ((loc[1] / 2.54) * 10) + 450;
 		var z = loc[2];
 		context.beginPath();
 		console.log('Drawing loc at (' + x + ',' + y + ',' + z + ')');
 		context.arc(x, y, 5, 0, 2 * Math.PI, false);
+
+		context.globalAlpha = Math.max(0, 1-(age / age_out));
 		context.fillStyle = '#faa';
+		context.strokeStyle = '#f44' //"#f66";
 		context.fill();
 		context.lineWidth = 2;
-		context.strokeStyle = '#f44' //"#f66";
 		context.stroke();
 	}
+
+	function draw_all_locs() {
+		var dots_canvas = document.getElementById('dots_canvas');
+		var dots_ctx = dots_canvas.getContext('2d');
+		dots_ctx.clearRect(0, 0, WIDTH, HEIGHT);
+		if (loc_hist.length == 0) return;
+
+		console.log(loc_hist);
+		console.log('element 0:');
+		console.log(loc_hist[0]);
+		while ((loc_hist[0]['time'] + age_out) < Date.now()) {
+			loc_hist.shift();
+			if (loc_hist.length == 0) return;
+		}
+		for (var i=0; i < loc_hist.length; i++) {
+			var loc = loc_hist[i]['rx_location'];
+			var age = Math.max(1, Date.now() - loc_hist[i]['time']);
+			draw_loc(dots_ctx, loc, age);
+		}
+	}
+
+	var updater_interval = setInterval(function(){draw_all_locs()}, 100);
 
 	onload = function() {
 		socket_loc = io.connect('inductor.eecs.umich.edu:8082/stream');
@@ -114,9 +147,8 @@
 		});
 
 		socket_loc.on('data', function (data) {
-			//var color = get_color(data['ccid_mac'])
-			var loc = data['rx_location'];
-			draw_loc(loc);
+			console.log(data);
+			loc_hist.push(data);
 		});
 	}
 	</script>

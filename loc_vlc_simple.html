@@ -89,6 +89,37 @@
 		context.stroke();
 	}
 
+	// Adapted from http://jsfiddle.net/SguzM/89/
+	function findAngle(p1, p2) {
+		return Math.atan2((p2[1] - p1[1]), (p2[0] - p1[0]));
+	}
+
+	function drawArrowhead(ctx, locx, locy, angle, sizex, sizey) {
+		var hx = sizex / 2;
+		var hy = sizey / 2;
+		ctx.translate((locx ), (locy));
+		ctx.rotate(angle);
+		ctx.translate(-hx,-hy);
+
+		ctx.beginPath();
+		ctx.moveTo(0,0);
+		ctx.lineTo(0,1*sizey);
+		ctx.lineTo(1*sizex,1*hy);
+		ctx.closePath();
+		ctx.fill();
+
+		ctx.translate(hx,hy);
+		ctx.rotate(-angle);
+		ctx.translate(-locx,-locy);
+	}
+
+	function draw_arrow(context, start, end) {
+		draw_line(context, start, end);
+		angle = findAngle(start, end);
+		console.log("angle: " + angle);
+		drawArrowhead(context, end[0], end[1], angle, 10, 10);
+	}
+
 	function draw_background() {
 		var grid_canvas = document.getElementById('grid_canvas');
 		var context = grid_canvas.getContext('2d');
@@ -112,30 +143,48 @@
 			context.stroke();
 		}
 
+		// Draw orientation marker
+		context.strokeStyle = "#00f";
+		context.fillStyle = '#00f';
+		context.textBaseline = "middle";
+
+		draw_arrow(context, [PX_SCALE*1, PX_SCALE*1], [PX_SCALE*4, PX_SCALE*1]);
+		draw_arrow(context, [PX_SCALE*1, PX_SCALE*1], [PX_SCALE*1, PX_SCALE*4]);
+		context.fillText('+x', PX_SCALE*5, PX_SCALE*1);
+		context.textAlign = 'center';
+		context.fillText('+y', PX_SCALE*1, PX_SCALE*5);
+		context.textAlign = 'left';
+
 		// Draw 1" scale marker
-		context.strokeStyle = '#f00';
-		draw_line(context, [PX_SCALE,   HEIGHT-PX_SCALE], [PX_SCALE*2, HEIGHT-PX_SCALE]);
-		draw_line(context, [PX_SCALE,   HEIGHT-PX_SCALE+PX_SCALE/3], [PX_SCALE,   HEIGHT-PX_SCALE-PX_SCALE/3]);
-		draw_line(context, [PX_SCALE*2, HEIGHT-PX_SCALE+PX_SCALE/3], [PX_SCALE*2, HEIGHT-PX_SCALE-PX_SCALE/3]);
+		context.strokeStyle = "#f00";
 		context.fillStyle = '#f00';
 		context.textBaseline = "middle";
-		context.fillText('1 inch', PX_SCALE*3, HEIGHT-PX_SCALE);
+
+		draw_line(context, [PX_SCALE*7, PX_SCALE], [PX_SCALE*8, PX_SCALE]);
+		draw_line(context, [PX_SCALE*7, PX_SCALE+PX_SCALE/3], [PX_SCALE*7,   PX_SCALE-PX_SCALE/3]);
+		draw_line(context, [PX_SCALE*8, PX_SCALE+PX_SCALE/3], [PX_SCALE*8, PX_SCALE-PX_SCALE/3]);
+		var orig_font = context.font;
+		context.font = "bold 11px sans-serif";
+		context.fillText('1 inch', PX_SCALE*9, PX_SCALE);
+		context.font = orig_font;
+
+		// Draw Door
+		var hinge = [200+220+320, 200+30]
+		context.strokeStyle = '#000';
+		context.lineWidth = 2;
+		draw_line(context, t(hinge), t([hinge[0], hinge[1]-320]));
+		context.lineWidth = 1;
+		context.strokeStyle = '#666';
+		context.beginPath();
+		context.arc(tx(hinge[0]), ty(hinge[1]), 320, 0.5*Math.PI, Math.PI);
+		context.stroke();
 
 		// Draw Wall
 		context.strokeStyle = '#000';
 		context.lineWidth = 3;
-		draw_line(context, t([-WIDTH/2, 200+30]), t([WIDTH/2, 200+30]));
+		draw_line(context, t([-WIDTH/2, 200+30]), t([hinge[0]-320, 200+30]));
+		draw_line(context, t([hinge[0], 200+30]), t([WIDTH/2, 200+30]));
 		context.lineWidth = 1;
-
-		// Draw Door
-		hinge = [200+220+320, 200+30]
-		context.lineWidth = 2;
-		draw_line(context, t(hinge), t([hinge[0], hinge[1]-320]));
-		context.lineWidth = 1;
-		context.strokeStyle = '#444';
-		context.beginPath();
-		context.arc(tx(hinge[0]), ty(hinge[1]), 320, 0.5*Math.PI, Math.PI);
-		context.stroke();
 
 		// Draw Transmitter Box
 		function draw_square(context, center, radius) {

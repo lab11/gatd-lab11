@@ -112,6 +112,15 @@
 			context.stroke();
 		}
 
+		// Draw 1" scale marker
+		context.strokeStyle = '#f00';
+		draw_line(context, [PX_SCALE,   HEIGHT-PX_SCALE], [PX_SCALE*2, HEIGHT-PX_SCALE]);
+		draw_line(context, [PX_SCALE,   HEIGHT-PX_SCALE+PX_SCALE/3], [PX_SCALE,   HEIGHT-PX_SCALE-PX_SCALE/3]);
+		draw_line(context, [PX_SCALE*2, HEIGHT-PX_SCALE+PX_SCALE/3], [PX_SCALE*2, HEIGHT-PX_SCALE-PX_SCALE/3]);
+		context.fillStyle = '#f00';
+		context.textBaseline = "middle";
+		context.fillText('1 inch', PX_SCALE*3, HEIGHT-PX_SCALE);
+
 		// Draw Wall
 		context.strokeStyle = '#000';
 		context.lineWidth = 3;

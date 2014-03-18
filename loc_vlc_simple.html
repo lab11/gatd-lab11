@@ -1,7 +1,7 @@
 <html>
 <head>
 	<script src="bower_components/socket.io-client/dist/socket.io.min.js"></script>
-	<script src="bower_components/jquery/dist/jquery.min.js"></script>
+	<script src="bower_components/jquery/jquery.min.js"></script>
 	<script src="js/jquery.flot.custom-0.8.2.js"></script>
 	<script src="bower_components/flot/jquery.flot.time.js"></script>
 	<script src="bower_components/underscore/underscore.js"></script>
@@ -32,6 +32,9 @@
 				style="z-index: 1; position:absolute; top:100px; right: 0; left: 0; margin-right: auto; margin-left: auto;"></canvas>
 			<canvas id="dots_canvas" width="900" height="900"
 				style="z-index: 2; position:absolute; top:100px; right: 0; left: 0; margin-right: auto; margin-left: auto;"></canvas>
+		</div>
+		<div>
+			<button onclick="onclick_replay_train()">Replay Train Experiment (5x speed)</input>
 		</div>
 		<!--
 		<div id="key" class="box_shadow key">
@@ -82,8 +85,8 @@
 
 	function draw_line(context, start, end) {
 		context.beginPath();
-		console.log(start);
-		console.log(end);
+		//console.log(start);
+		//console.log(end);
 		context.moveTo(start[0], start[1]);
 		context.lineTo(end[0], end[1]);
 		context.stroke();
@@ -125,7 +128,7 @@
 	function draw_arrow(context, start, end) {
 		draw_line(context, start, end);
 		angle = findAngle(start, end);
-		console.log("angle: " + angle);
+		//console.log("angle: " + angle);
 		drawArrowhead(context, end[0], end[1], angle, 10, 10, false);
 	}
 
@@ -265,11 +268,11 @@
 		var y = ty((loc[1] / 2.54) * PX_SCALE)
 		var z = loc[2];
 		context.beginPath();
-		console.log('Drawing loc at (' + x + ',' + y + ')');
+		//console.log('Drawing loc at (' + x + ',' + y + ')');
 		context.arc(x, y, 5, 0, 2 * Math.PI, false);
 
 		context.globalAlpha = Math.max(0, 1-(age / age_out));
-		console.log("alpha: " + context.globalAlpha);
+		//console.log("alpha: " + context.globalAlpha);
 		context.fillStyle = '#faa';
 		context.strokeStyle = '#f44' //"#f66";
 		context.fill();
@@ -287,7 +290,7 @@
 		//context.lineTo(x-x_rot, y+y_rot)
 		var x_rot = rot[0][0] * 30;
 		var y_rot = rot[0][1] * 30;
-		draw_arrow(context, [x,y], [x-x_rot, y+y_rot]);
+		draw_arrow(context, [x,y], [x+x_rot, y+y_rot]);
 	}
 
 	function draw_all_locs() {
@@ -306,8 +309,6 @@
 			var age = Math.max(1, Date.now() - loc_hist[i]['display_rx_time']);
 			draw_loc(dots_ctx, loc, rot, age);
 		}
-
-		console.log('draw_all_locs complete')
 	}
 
 	var updater_interval = setInterval(function(){draw_all_locs()}, 500);
@@ -327,6 +328,33 @@
 
 	function on_grid_cb_click() {
 		draw_background();
+	}
+
+	function onclick_replay_train() {
+		console.log('onclick_replay_train clicked');
+		replay_sock = io.connect('inductor.eecs.umich.edu:8084/stream');
+		replay_sock.on('connect', function (data) {
+			//console.log('emitting replay query for ' + TRAIN_START_TIME_EDT_MS + ' to ' +
+			//	TRAIN_END_TIME_EDT_MS)
+			replay_sock.emit('query',
+				{'profile_id': LOC_VLC_PID,
+				//'time': {'$gt': 1394722810000, '$lt': 1394723067000},
+				'time': {'$gt': 1394722889000, '$lt': 1394723066235},
+				'_speedup': 5.0,
+				}
+			);
+			console.log('query emitted');
+				//'time': {'$gt': 1395178041000}, // known data point at 1395178041086
+				// PAT 11 AM 'time': {'$gt': 1394722800000},
+				// BRAD 'time': {'$gt': 1394723150000},
+				//'time': {'$gt': TRAIN_START_TIME_EDT_MS, '$lt': TRAIN_END_TIME_EDT_MS},
+		});
+
+		replay_sock.on('data', function (data) {
+			data['display_rx_time'] = Date.now();
+			console.log('replay data point: ' + data + ' time: ' + data['time']);
+			loc_hist.push(data);
+		});
 	}
 
 	$('#cb_floor_pegboard').click(on_grid_cb_click);

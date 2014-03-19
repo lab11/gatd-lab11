@@ -19,3 +19,8 @@ yourself.
     npm install
     sudo npm install -g jake
     jake
+
+If the webpages can't find javascript files, it's likely that something in
+bower-land is broken. My suggestion? Removed the `bower_components` folder
+and re-run `bower install`.
+

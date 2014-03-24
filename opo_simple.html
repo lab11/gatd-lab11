@@ -173,8 +173,7 @@
 			if (dedup[txid + '' + rxid] == lseq) return;
 		}
 		dedup[txid + '' + rxid] = lseq;
-
-		ranges.push([txid, rxid, new Date(data['full_time']), Math.round(data['range']*10)/10]);
+		ranges.push([txid, rxid, new Date(data['full_time']*1000), Math.round(data['range']*10)/10]);
 
 		draw();
 	}

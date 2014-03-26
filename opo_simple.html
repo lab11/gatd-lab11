@@ -7,6 +7,7 @@
 	<script src="bower_components/underscore/underscore.js"></script>
 	<script src="js/jquery.grapher.js"></script>
 	<script src="js/gatd_graph.js"></script>
+	<script src="js/gatd_canvas.js"></script>
 	<script src="js/pretty.js"></script>
 	<script>WEB_SOCKET_SWF_LOCATION='bower_components/socket.io-client/dist/WebSocketMain.swf'</script>
 
@@ -63,32 +64,17 @@
 	var loc_hist = Array();
 	var age_out = 15000; //1000 * 60 * 5;
 
-	function draw_line (context, x1, y1, x2, y2) {
-		context.strokeStyle = '#ccc';
-		context.fillStyle = '#ccc';
-		context.beginPath();
-		context.moveTo(x1, y1);
-		context.lineTo(x2, y2);
-		context.closePath();
-		context.fill();
-		context.stroke();
-	}
-
-	function draw_circle (context, x, y, color) {
-		context.beginPath();
-		context.arc(x, y, 10, 0, 2 * Math.PI);
-		context.fillStyle = color;
-		context.strokeStyle = color;
-		context.fill();
-		context.lineWidth = 2;
-		context.stroke();
-	}
-
 	function draw_text (context, text, x, y, align) {
 		context.textAlign = align;
 		context.strokeStyle = '#000';
 		context.fillStyle = '#000';
 		context.fillText(text, x, y);
+	}
+
+	function draw_gray_line(context, x1, y1, x2, y2) {
+		context.strokeStyle = '#ccc';
+		context.fillStyle = '#ccc';
+		draw_solid_line(context, x1, y1, x2, y2);
 	}
 
 	function draw_header (context) {
@@ -97,14 +83,14 @@
 		context.clearRect(0, 0, WIDTH, HEADER_HEIGHT);
 
 		// Draw line to separate header
-		draw_line(context, 0, HEADER_HEIGHT, WIDTH, HEADER_HEIGHT);
+		draw_gray_line(context, 0, HEADER_HEIGHT, WIDTH, HEADER_HEIGHT);
 
 		// Draw header dots and names
 		for (i=0; i<columns.length; i++) {
 			pid = columns[i];
 			x = COLUMN_LEFT_MARGIN + i*COLUMN_SPACING;
 			y = HEADER_DOT_TOP_MARGIN;
-			draw_circle(context, x, y, people[pid]['color']);
+			draw_circle(context, x, y, 10, people[pid]['color']);
 
 			draw_text(context, people[pid]['name'], x, HEADER_NAME_TOP_MARGIN, 'center');
 		}
@@ -118,6 +104,10 @@
 		context.clearRect(0, HEADER_HEIGHT, WIDTH, BODY_HEIGHT);
 
 		for (i=ranges.length-1; i>0 && i>ranges.length-ROWS; i--) {
+			// tx = 'tx_id' key, which is the Opo that sent the
+			// packet received by gatd. This packet is the last
+			// range that was _received_ by this node, so the arrow
+			// for visualization is drawn rx --> tx (x2 --> x1).
 			tx = ranges[i][0];
 			rx = ranges[i][1];
 			timestamp = ranges[i][2];
@@ -126,10 +116,19 @@
 			x1 = people[tx]['column']*COLUMN_SPACING+COLUMN_LEFT_MARGIN;
 			x2 = people[rx]['column']*COLUMN_SPACING+COLUMN_LEFT_MARGIN;
 
-			draw_line(context, x1, y, x2, y);
+			// 15 = radius of circle (10) + 1/2 arrowhead size (5)
+			context.strokeStyle = '#ccc';
+			context.fillStyle = '#ccc';
+			if (x2 < x1) {
+				// Arrow points left
+				draw_arrow(context, [x2, y], [x1-15, y], true);
+			} else {
+				// Arrow points right
+				draw_arrow(context, [x2, y], [x1+15, y], true);
+			}
 
-			draw_circle(context, x1, y, people[tx]['color']);
-			draw_circle(context, x2, y, people[rx]['color']);
+			draw_circle(context, x1, y, 10, people[tx]['color']);
+			draw_circle(context, x2, y, 10, people[rx]['color']);
 
 			draw_text(context, prettyDate(timestamp), 10, y, 'left');
 			draw_text(context, range, (x1+x2)/2, y-1, 'center');

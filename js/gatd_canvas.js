@@ -1,4 +1,23 @@
 
+function draw_solid_line (context, x1, y1, x2, y2) {
+	context.beginPath();
+	context.moveTo(x1, y1);
+	context.lineTo(x2, y2);
+	context.closePath();
+	context.fill();
+	context.stroke();
+}
+
+function draw_circle (context, x, y, radius_in_px, color) {
+	context.beginPath();
+	context.arc(x, y, radius_in_px, 0, 2 * Math.PI);
+	context.fillStyle = color;
+	context.strokeStyle = color;
+	context.fill();
+	context.lineWidth = 2;
+	context.stroke();
+}
+
 function draw_line(context, start, end) {
 	context.beginPath();
 	//console.log(start);
@@ -13,7 +32,10 @@ function findAngle(p1, p2) {
 	return Math.atan2((p2[1] - p1[1]), (p2[0] - p1[0]));
 }
 
-function drawArrowhead(ctx, locx, locy, angle, sizex, sizey, fill) {
+function draw_arrowhead(ctx, locx, locy, angle, sizex, sizey, fill) {
+	console.log("draw_arrowhead at (" + locx + "," + locy + ") angle " +
+			angle + " with arrow size (" + sizex + "," + sizey +
+			") and fill is " + fill);
 	var hx = sizex / 2;
 	var hy = sizey / 2;
 	ctx.translate((locx ), (locy));
@@ -41,9 +63,14 @@ function drawArrowhead(ctx, locx, locy, angle, sizex, sizey, fill) {
 	ctx.translate(-locx,-locy);
 }
 
-function draw_arrow(context, start, end) {
+function draw_arrow(context, start, end, fill, length_xy_x, length_y) {
+	// Default values in JS:
+	fill        = typeof fill        !== 'undefined' ? fill        : false;
+	length_xy_x = typeof length_xy_x !== 'undefined' ? length_xy_x : 10;
+	length_y    = typeof length_y    !== 'undefined' ? length_y    : length_xy_x;
+
 	draw_line(context, start, end);
 	angle = findAngle(start, end);
 	//console.log("angle: " + angle);
-	drawArrowhead(context, end[0], end[1], angle, 10, 10, false);
+	draw_arrowhead(context, end[0], end[1], angle, length_xy_x, length_y, fill);
 }

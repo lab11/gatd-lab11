@@ -20,6 +20,7 @@
 	"jsIP": ">= 0.1.2",
 	"leaflet": ">= 0.7.1",
 	"bignumber.js": ">= 1.3.0",
-	"threejs": null
+	"threejs": null,
+	"d3": ">= 3.4.5"
   }
 }

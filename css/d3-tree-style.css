@@ -12,11 +12,7 @@ body {
 }
 
 #header, #footer {
-  z-index: 1;
-  display: block;
-  font-size: 36px;
-  font-weight: 300;
-  text-shadow: 0 1px 0 #fff;
+
 }
 
 #header.inverted, #footer.inverted {
@@ -34,6 +30,26 @@ body {
   top: 680px;
   right: 140px;
   text-align: right;
+}
+
+#box {
+  position: absolute;
+  top:   30px;
+  right: 30px;
+  width: 20%;
+  background-color: white;
+  z-index: 1;
+  display: block;
+
+  font-weight: 300;
+  text-shadow: 0 1px 0 #fff;
+  text-align: center;
+}
+
+h1 {
+  font-size: 36px;
+  padding-bottom: 0;
+  margin-bottom: 1px;
 }
 
 rect {
@@ -81,9 +97,46 @@ a:hover {
 }
 
 .hint {
-  position: absolute;
-  right: 0;
-  width: 1280px;
+
   font-size: 12px;
   color: #999;
+}
+
+.node {
+  cursor: pointer;
+}
+
+.overlay{
+  background-color:#EEE;
+}
+
+.node circle {
+  fill: #fff;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.node text {
+  font-size:14px;
+  font-family:sans-serif;
+}
+
+.link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 1.5px;
+}
+
+.templink {
+  fill: none;
+  stroke: red;
+  stroke-width: 3px;
+}
+
+.ghostCircle.show{
+  display:block;
+}
+
+.ghostCircle, .activeDrag .ghostCircle{
+  display: none;
 }

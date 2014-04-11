@@ -37,9 +37,9 @@ path.link {
 		</div>
 		<script type="text/javascript">
 
-var m = [20, 120, 20, 120];
-var w = 1600 - m[1] - m[3];
-var h = 1200 - m[0] - m[2];
+var m = [20, 20, 20, 60];
+var w = window.innerWidth - m[1] - m[3];
+var h = window.innerHeight - m[0] - m[2];
 var i = 0;
 var root;
 
@@ -126,7 +126,7 @@ function update(source) {
 	var nodes = tree.nodes(root).reverse();
 
 	// Normalize for fixed-depth.
-	nodes.forEach(function(d) { d.y = d.depth * 180; });
+	nodes.forEach(function(d) { d.y = d.depth * 250; });
 
 	// Update the nodes…
 	var node = vis.selectAll("g.node")

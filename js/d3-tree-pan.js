@@ -29,19 +29,21 @@ treeJSON = d3.json("http://memristor-v1.eecs.umich.edu:8085/explore/all", functi
             return [d.y, d.x];
         });
 
-    function add (d, out) {
+    function add (d, out, parent) {
         var keys = Object.keys(d)
         for (var key in d) {
             if (Object.keys(d[key]).length > 0) {
                 out.push({
                     "name": key,
-                    "children": []
-                })
-                add(d[key], out[out.length-1]["children"])
+                    "children": [],
+                    "parent": parent
+                });
+                add(d[key], out[out.length-1]["children"], out[out.length-1]);
             } else {
                 out.push({
-                    "name": key
-                })
+                    "name": key,
+                    "parent": parent
+                });
             }
         }
     }
@@ -51,7 +53,7 @@ treeJSON = d3.json("http://memristor-v1.eecs.umich.edu:8085/explore/all", functi
                 "children": []
                }
 
-    add(json["explore"], treeData["children"])
+    add(json["explore"], treeData["children"], treeData);
 
     for (i=0; i<treeData["children"].length; i++) {
         var pid = treeData["children"][i]["name"]
@@ -273,6 +275,40 @@ treeJSON = d3.json("http://memristor-v1.eecs.umich.edu:8085/explore/all", functi
      //   centerNode(d);
     }
 
+    function add_query_keyvalue (d, query) {
+        if (!("parent" in d["parent"])) {
+            // Do something special when we get down to the profile ID
+            query["profile_id"] = d["pid"];
+        } else {
+            query[d["parent"]["name"]] = d["name"];
+            add_query_keyvalue(d["parent"]["parent"], query);
+        }
+    }
+
+    function create_query (d) {
+        var query = {};
+
+        if (d.depth % 2 == 0) {
+            // This is an even depth node. This must contain a key. This
+            // cannot be queried.
+            return
+        } else {
+            // Odd depth nodes are values which can specify a query.
+            add_query_keyvalue(d, query);
+
+        }
+        return query;
+    }
+
+    function contextmenu (d) {
+        d3.event.preventDefault();
+        query = create_query(d);
+
+        if (query) {
+
+        }
+    }
+
     function update(source) {
         // Compute the new height, function counts total children of root node and sets tree height accordingly.
         // This prevents the layout looking squashed when new nodes are made visible or looking sparse when nodes are removed
@@ -319,7 +355,8 @@ treeJSON = d3.json("http://memristor-v1.eecs.umich.edu:8085/explore/all", functi
             .attr("transform", function(d) {
                 return "translate(" + source.y0 + "," + source.x0 + ")";
             })
-            .on('click', click);
+            .on('click', click)
+            .on('contextmenu', contextmenu);
 
         nodeEnter.append("circle")
             .attr('class', 'nodeCircle')

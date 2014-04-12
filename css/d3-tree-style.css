@@ -37,6 +37,7 @@ body {
   top:   30px;
   right: 30px;
   width: 20%;
+  height: 90%;
   background-color: white;
   z-index: 1;
   display: block;
@@ -50,6 +51,32 @@ h1 {
   font-size: 36px;
   padding-bottom: 0;
   margin-bottom: 1px;
+}
+
+.side-box {
+  margin: 20px 10px;
+  border: 1px solid #ccc;
+  padding: 5px;
+  text-align: left;
+  overflow: hidden;
+}
+
+.side-box div {
+  color: #000;
+}
+
+#stream-box {
+  height: 70%;
+}
+
+.side-box span {
+  color: #ccc;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+#query-box {
+  height: 15%;
 }
 
 rect {

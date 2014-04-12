@@ -7,20 +7,27 @@
 		<script src="bower_components/jquery/dist/jquery.min.js"></script>
 		<script src="js/d3-tree-pan.js"></script>
 
+		<script src="bower_components/socket.io-client/dist/socket.io.min.js"></script>
+	<script>WEB_SOCKET_SWF_LOCATION='bower_components/socket.io-client/dist/WebSocketMain.swf'</script>
+
+
 		<title>GATD Streams</title>
 	</head>
 	<body>
 		<div id="tree-container"></div>
 		<div id="box">
 			<h1>GATD Streams</h1>
-			<div class="hint">click or option-click to expand or collapse</div>
+			<div class="hint">Left click on nodes to expand the streams. <br />
+			Right click to view the query and see the stream live.</div>
 
-			<div id="stream-box">
-			streams
+			<div id="stream-box" class="side-box">
+				<span>Stream</span>
+				<div id="stream-elements"></div>
 			</div>
 
-			<div id="query-box">
-			query
+			<div id="query-box" class="side-box">
+				<span>Query</span>
+				<div></div>
 			</div>
 		</div>
 	</body>

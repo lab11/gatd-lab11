@@ -1,3 +1,5 @@
+
+//var socket;
 // Get JSON data
 treeJSON = d3.json("http://memristor-v1.eecs.umich.edu:8085/explore/all", function(error, json) {
 //treeJSON = d3.json("http://bl.ocks.org/robschmuecker/raw/7880033/flare.json", function(error, json) {
@@ -300,12 +302,36 @@ treeJSON = d3.json("http://memristor-v1.eecs.umich.edu:8085/explore/all", functi
         return query;
     }
 
+    var socket;
+    function run_query (query) {
+        if (socket) {
+            //socket.emit('query', query);
+            //socket.disconnect();
+            $("#stream-box div").empty();
+            socket.emit('query', query);
+        } else{
+        socket = io.connect('inductor.eecs.umich.edu:8082/stream');
+        socket.on('connect', function (data) {
+            socket.emit('query', query);
+        });
+
+        socket.on('data', function (data) {
+            $("#stream-elements div:gt(100)").remove();
+            $("#stream-elements").prepend("<div>"+JSON.stringify(data)+"</div>");
+        });
+        socket.on('disconnect', function () {
+        });
+    }
+    }
+
+
     function contextmenu (d) {
         d3.event.preventDefault();
         query = create_query(d);
 
         if (query) {
-
+            $("#query-box div").text(JSON.stringify(query));
+            run_query(query);
         }
     }
 

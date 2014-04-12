@@ -1,8 +1,6 @@
 
-//var socket;
 // Get JSON data
-treeJSON = d3.json("http://memristor-v1.eecs.umich.edu:8085/explore/all", function(error, json) {
-//treeJSON = d3.json("http://bl.ocks.org/robschmuecker/raw/7880033/flare.json", function(error, json) {
+treeJSON = d3.json("http://inductor.eecs.umich.edu:8085/explore/all", function(error, json) {
 
     // Calculate total nodes, max label length
     var totalNodes = 0;

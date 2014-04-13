@@ -19,6 +19,5 @@ class wemoParser (parser.parser):
 		ret['port']    = meta['port']
 		ret['address'] = str(meta['addr'])
 		ret['time']    = meta['time']
-		ret['public']  = settings['public']
 
 		return ret

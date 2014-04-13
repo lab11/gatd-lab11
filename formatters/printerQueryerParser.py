@@ -37,7 +37,4 @@ class printerQueryerParser ():
 			ret['status_type'] = datamap['status_type']
 			ret['status_val']  = datamap['status_val']
 
-		ret['public']    = settings['public']
-
 		return ret
-

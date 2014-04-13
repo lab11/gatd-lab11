@@ -20,6 +20,5 @@ class githubParser (parser.parser):
 		ret['address'] = str(meta['addr'])
 		ret['time']    = meta['time']
 		ret['port']    = meta['port']
-		ret['public']  = settings['public']
 
 		return ret

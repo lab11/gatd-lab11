@@ -19,7 +19,6 @@ class shedCommitParser ():
 		ret['user']    = lines[1]
 		ret['time']    = ti
 		ret['message'] = lines[4]
-		ret['public']  = settings['public']
 
 		print ret
 

@@ -200,6 +200,5 @@ class gridwatchParser (parser.parser):
 
 		ret['address']    = str(meta['addr'])
 		ret['port']       = meta['port']
-		ret['public']     = settings['public']
 
 		return ret

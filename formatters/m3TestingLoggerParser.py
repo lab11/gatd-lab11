@@ -19,7 +19,5 @@ class m3TestingLoggerParser (parser.parser):
 		ret['address'] = str(meta['addr'])
 		ret['port']    = meta['port']
 		ret['time']    = meta['time']
-		ret['public']  = settings['public']
 
 		return ret
-

@@ -32,7 +32,6 @@ class computerStatsParser (parser.parser):
 			ret['network_sent']    = datamap['net-sent']
 		if 'net-recv' in datamap:
 			ret['network_receive'] = datamap['net-recv']
-		ret['public']          = settings['public']
 
 		print str(IPy.IP(meta['addr'])) + ' usage: ' + str(datamap['cpu'])
 

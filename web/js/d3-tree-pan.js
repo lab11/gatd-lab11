@@ -314,8 +314,8 @@ treeJSON = d3.json("http://inductor.eecs.umich.edu:8085/explore/all", function(e
         });
 
         socket.on('data', function (data) {
-            $("#stream-elements div:gt(100)").remove();
-            $("#stream-elements").prepend("<div>"+JSON.stringify(data)+"</div>");
+            $("#stream-elements div:gt(15)").remove();
+            $("#stream-elements").prepend("<div>"+JSON.stringify(data, null, " ")+"</div>");
         });
         socket.on('disconnect', function () {
         });

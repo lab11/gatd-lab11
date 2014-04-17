@@ -83,6 +83,7 @@ class opoParser (parser.parser):
 		adjusted_l_date = l_date + tdiff
 
 		ret['adjusted_last_full_timestamp'] = time.mktime(adjusted_l_date.timetuple())
+		ret['last_full_timestamp'] = time.mktime(l_date.timetuple())
 
 		# Standard GATD Footer
 		ret['address'] = str(meta['addr'])

@@ -44,6 +44,7 @@ class opoParser (parser.parser):
 			ret['last_full_time'][i] = convert_bcd(ret['last_full_time'][i])
 
 		ret['m_full_time'][7] += 2000 # accounting for century bits in month
+		ret['last_full_time'][7] += 2000
 
 		true_full_time = [0, n.second, n.minute, n.hour, n.weekday(), n.day, n.month, n.year]
 		ret['true_full_time'] = true_full_time
@@ -51,19 +52,31 @@ class opoParser (parser.parser):
 		sec = ret['m_full_time'][1]
 		minute = ret['m_full_time'][2]
 		hr = ret['m_full_time'][3]
-		d = ret['m_full_time'][5]
+		d = ret['m_full_time'][5] & 0x3f
 		month = ret['m_full_time'][6]
 		year = ret['m_full_time'][7]
+
+		if d == 0:
+			d = 1
+		if month == 0:
+			month = 1
 
 		lsec = ret['last_full_time'][1]
 		lminute = ret['last_full_time'][2]
 		lhr = ret['last_full_time'][3]
-		ld = ret['last_full_time'][5]
+		ld = ret['last_full_time'][5] & 0x3f
 		lmonth = ret['last_full_time'][6]
 		lyear = ret['last_full_time'][7]
 
-		m_date = datetime.datetime(year, month, d, hr, minute, sec, tzinfo=pytz.timezone('US/Eastern'))
-		l_date = datetime.datetime(lyear, lmonth, ld, lhr, lminute, lsec, tzinfo=pytz.timezone('US/Eastern'))
+		if ld == 0:
+			ld = 1
+		if lmonth == 0:
+			lmonth = 1
+
+		print d, ld
+
+		m_date = datetime.datetime(year, month, d, hr, minute, sec)
+		l_date = datetime.datetime(lyear, lmonth, ld, lhr, lminute, lsec)
 
 		tdiff = n - m_date
 

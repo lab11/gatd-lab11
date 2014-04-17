@@ -119,12 +119,12 @@
 			// 15 = radius of circle (10) + 1/2 arrowhead size (5)
 			context.strokeStyle = '#ccc';
 			context.fillStyle = '#ccc';
-			if (x2 < x1) {
+			if (x2 >= x1) {
 				// Arrow points left
 				draw_arrow(context, [x2, y], [x1-15, y], true);
 			} else {
 				// Arrow points right
-				draw_arrow(context, [x1, y], [x2-15, y], true);
+				draw_arrow(context, [x2, y], [x1+15, y], true);
 			}
 
 			draw_circle(context, x1, y, 10, people[tx]['color']);

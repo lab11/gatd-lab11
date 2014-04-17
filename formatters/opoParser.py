@@ -22,7 +22,7 @@ class opoParser (parser.parser):
 			return t
 
 		ret = {}
-		n = datetime.datetime.now()
+		n = datetime.datetime.fromtimestamp(meta['time']/1000)
 
 		# Opo-Specific
 		s = struct.unpack('!10s I I H H 8B H 8B', data)

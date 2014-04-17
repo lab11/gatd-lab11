@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+		<link type="text/css" rel="stylesheet" href="css/d3-tree-style.css"/>
+		<script type="text/javascript" src="bower_components/d3/d3.js"></script>
+		<script src="bower_components/jquery/dist/jquery.min.js"></script>
+		<script src="js/d3-tree-pan.js"></script>
+
+		<script src="bower_components/socket.io-client/dist/socket.io.min.js"></script>
+	<script>WEB_SOCKET_SWF_LOCATION='bower_components/socket.io-client/dist/WebSocketMain.swf'</script>
+
+
+		<title>GATD Streams</title>
+	</head>
+	<body>
+		<div id="tree-container"></div>
+		<div id="box">
+			<h1>GATD Streams</h1>
+			<div class="hint">Left click on nodes to expand the streams. <br />
+			Right click to view the query and see the stream live.</div>
+			<div id="content-boxes">
+				<div id="stream-box" class="side-box">
+					<span>Stream</span>
+					<div id="stream-elements"></div>
+				</div>
+
+				<div id="query-box" class="side-box">
+					<span>Query</span>
+					<div></div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

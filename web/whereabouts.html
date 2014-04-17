@@ -1,0 +1,58 @@
+<html>
+<head>
+	<script src="bower_components/socket.io-client/dist/socket.io.min.js"></script>
+	<script src="bower_components/jquery/dist/jquery.min.js"></script>
+	<script src="js/jquery.flot.custom-0.8.2.js"></script>
+	<script src="bower_components/flot/jquery.flot.time.js"></script>
+	<script src="bower_components/underscore/underscore.js"></script>
+    <script src="js/jquery.grapher.js"></script>
+    <script src="js/whereabouts.js"></script>
+	<script>WEB_SOCKET_SWF_LOCATION='bower_components/socket.io-client/dist/WebSocketMain.swf'</script>
+
+    <link href="css/bootstrap.min.css" media="all" rel="stylesheet" type="text/css" />
+    <link href="css/gatd_graph.css" media="all" rel="stylesheet" type="text/css" />
+
+	<title>Whereabouts</title>
+</head>
+
+<body>
+	<div id="headerBar">
+		<div style="width:1000px; margin:0 auto; text-align:center;">
+			<div style="float:left"><img src="images/BlockM-rball.png" height="50px" style="margin-top:5px;" /></div>
+			<div style="float:left; padding:6px 0 0 50px;">Whereabouts - Semantic Heuristic Localization</div>
+		</div>
+    </div>
+    <div id="body" style="margin-top:5px;">
+        <div class="person_group" style="text-align: left;">
+            <div style="text-align: center;">
+                <div id="people_row" class="row" style="margin-bottom:5px;">
+                </div>
+            </div>
+        </div>
+	</div>
+
+	<script>
+    var CC_PID = 'hsYQx8blbd';
+	var socket_cc;
+
+	onload = function() {
+		socket_cc = io.connect('inductor.eecs.umich.edu:8082/stream');
+        socket_cc.on('connect', function (data) {
+            // Queries 30 minutes into the past
+            socket_cc.emit('query', {'profile_id': CC_PID,
+                                     'time': 30*60*1000
+                                 }
+			              );
+		});
+
+        socket_cc.on('data', function (data) {
+            //console.log(data['person_list'].toString() + " " +
+            //        data['time'] + " " + data['location_str']);
+            record_presence(data['person_list'], data['location_str'], data['time']);
+		});
+    }
+	</script>
+
+
+</body>
+</html>

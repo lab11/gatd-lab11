@@ -18,41 +18,41 @@ function display_person (uniqname) {
     // Get full name
     var full_name = presence_map[uniqname][2];
 
-    // Get picture location
-    var pic_src = "http://lab11.eecs.umich.edu/content/people/images/" + uniqname
-
-    // Try picture as a jpg
+    // Create new div for content
     var new_entry = 
-        $('<div class="col-lg-2">' +
-          '<img class="img-circle" src="' + pic_src + '.jpg" height="140px">' +
+        $('<div class="col-lg-2" id="' + uniqname +'">' +
           '<h3>' + full_name + '</h3>' +
           '<p>' + loc + '</p>' +
           '<p> Updated: ' + time + '</p>' +
-          '</div>')
-        .error(function() {
-            // Try as a png
-            $('<div class="col-lg-2">' +
-              '<img class="img-circle" src="' + pic_src + '.png" height="140px">' +
-              '<h3>' + full_name + '</h3>' +
-              '<p>' + loc + '</p>' +
-              '<p> Updated: ' + time + '</p>' +
-              '</div>')
-            .error(function() {
-                // Default picture
-                $('<div class="col-lg-2">' +
-                  '<img class="img-circle" src="images/person-placeholder.jpg" height="140px">' +
-                  '<h3>' + full_name + '</h3>' +
-                  '<p>' + loc + '</p>' +
-                  '<p> Updated: ' + time + '</p>' +
-                  '</div>')
-            });
-        });
-    
+          '</div>');
+
+    // Get picture location
+    var pic_src = "http://lab11.eecs.umich.edu/content/people/images/" + uniqname;
+
+    // Get picture
+    // Goodness this is awful. Try website jpg, try website png, try local jpg, try local png, give up
+    // Note that these are actually nested, but laying them out in line looks better
+    var img = $('<img class="img-circle" height="140px"/>').attr('src', pic_src + '.jpg')
+        .error( function() { /*console.log("Trying web png");*/   img.attr('src', pic_src + '.png')
+        .error( function() { /*console.log("Trying local jpg");*/ img.attr('src', 'images/' + uniqname + '.jpg')
+        .error( function() { /*console.log("Trying local png");*/ img.attr('src', 'images/' + uniqname + '.png')
+        .error( function() { /*console.log("Placeholder");*/      img.attr('src', 'images/person-placeholder.jpg')
+    ;});});});});
+
+    // Actually add person to page
     $("#people_row").append(new_entry);
+    $('#' + uniqname).prepend(img);
 }
 
 function record_presence (person_list, loc, time) {
     $("#people_row").empty();
+
+    // If no one was found, display a message
+    if (person_list.length == 0) {
+        var empty_text = $('<div><h3>No one found</h3></div>');
+        $("#people_row").append(empty_text);
+        return;
+    }
 
     // Check if new people need to be added to the map
     for (var i=0; i<person_list.length; i++) {
@@ -99,6 +99,5 @@ function record_presence (person_list, loc, time) {
         //console.log("presence_map[" + present_uniqname + "]:");
         //console.log(presence_map[present_uniqname].toString());
     }
-
 }
 

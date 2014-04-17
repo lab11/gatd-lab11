@@ -121,10 +121,10 @@
 			context.fillStyle = '#ccc';
 			if (x2 < x1) {
 				// Arrow points left
-				draw_arrow(context, [x2, y], [x1-15, y], true);
+				draw_arrow(context, [x2, y], [x1+15, y], true);
 			} else {
 				// Arrow points right
-				draw_arrow(context, [x2, y], [x1+15, y], true);
+				draw_arrow(context, [x2, y], [x1-15, y], true);
 			}
 
 			draw_circle(context, x1, y, 10, people[tx]['color']);
@@ -172,6 +172,7 @@
 			if (dedup[txid + '' + rxid] == data['adjusted_last_full_timestamp']) return;
 		}
 		dedup[txid + '' + rxid] = data['adjusted_last_full_timestamp'];
+
 		ranges.push([txid, rxid, new Date(data['adjusted_last_full_timestamp']*1000), Math.round(data['range']*10)/10]);
 
 		draw();

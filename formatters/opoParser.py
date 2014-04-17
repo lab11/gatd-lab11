@@ -29,8 +29,8 @@ class opoParser (parser.parser):
 		gatd_profile_id   = s[0]
 		ret['seq'] = s[1]
 		ret['reset_counter'] = s[2]
-		ret['m_id'] = s[3]
-		ret['last_tx_id'] = s[4]
+		ret['rx_id'] = s[3]
+		ret['tx_id'] = s[4]
 		ret['m_full_time'] = list(s[5:13])
 		ret['dt_ul_rf'] = s[13]
 		ret['last_full_time'] = list(s[14:22])

@@ -50,14 +50,14 @@ class opoParser (parser.parser):
 
 		sec = ret['full_time'][1]
 		minute = ret['full_time'][2]
-		hr = ret['full_time']3]
+		hr = ret['full_time'][3]
 		d = ret['full_time'][5]
 		month = ret['full_time'][6]
 		year = ret['full_time'][7]
 
 		lsec = ret['last_full_time'][1]
 		lminute = ret['last_full_time'][2]
-		lhr = ret['last_full_time']3]
+		lhr = ret['last_full_time'][3]
 		ld = ret['last_full_time'][5]
 		lmonth = ret['last_full_time'][6]
 		lyear = ret['last_full_time'][7]

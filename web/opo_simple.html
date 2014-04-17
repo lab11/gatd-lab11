@@ -169,9 +169,14 @@
 		}
 
 		if (_.has(dedup, (txid + '' + rxid))) {
-			if (dedup[txid + '' + rxid] == data['adjusted_last_full_timestamp']) return;
+			if (dedup[txid + '' + rxid] == data['adjusted_last_full_timestamp']) {
+				return;
+			} else {
+				console.log(dedup[txid + '' + rxid], data['adjusted_last_full_timestamp']);
+			}
 		}
 		dedup[txid + '' + rxid] = data['adjusted_last_full_timestamp'];
+
 		ranges.push([txid, rxid, new Date(data['adjusted_last_full_timestamp']*1000), Math.round(data['range']*10)/10]);
 
 		draw();

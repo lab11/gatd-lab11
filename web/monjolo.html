@@ -25,7 +25,7 @@
 	</div>
 	<div id="body">
 		<div>
-			<div id="graph" style="float:left" class="box_shadow graphmap"></div>
+			<div id="graph" style="float:left" class="box_shadow graphmap" style="height:600px;"></div>
 			<div id="map" style="float:left" class="map"></div>
 		</div>
 		<div id="key" class="box_shadow key" style="float:left;">
@@ -79,7 +79,7 @@
 		g = $.grapher($("#graph"),
 			{legend: {show: false, conainer: $("#graph_key")},
 			 xaxis:  {show:true, width:300000, mode: "time", tickFormatter:x_format},
-			 yaxis:  {min:0, label:"Frequency (Activations/Second)", max:4},
+			 yaxis:  {min:0, label:"Frequency (Activations/Second)", max:4.5},
 			 grid:   {margin: {top: 8, bottom: 20, left: 25, right: 25}},
 			});
 

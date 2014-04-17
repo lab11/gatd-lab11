@@ -36,24 +36,24 @@ class opoParser (parser.parser):
 		ret['last_full_time'] = list(s[14:22])
 		ret['range'] = float(ret['dt_ul_rf'])/32000.0 * 340.29 - .12
 
-		for i in range(len(ret['full_time'])):
+		for i in range(len(ret['m_full_time'])):
 			"""
 			Time Format, from 0-8: second, minute, hour, day (wrong), date, month, year (no century)
 			"""
-			ret['full_time'][i] = convert_bcd(ret['full_time'][i])
+			ret['m_full_time'][i] = convert_bcd(ret['m_full_time'][i])
 			ret['last_full_time'][i] = convert_bcd(ret['last_full_time'][i])
 
-		ret['full_time'][7] += 2000 # accounting for century bits in month
+		ret['m_full_time'][7] += 2000 # accounting for century bits in month
 
 		true_full_time = [0, n.second, n.minute, n.hour, n.weekday(), n.day, n.month, n.year]
 		ret['true_full_time'] = true_full_time
 
-		sec = ret['full_time'][1]
-		minute = ret['full_time'][2]
-		hr = ret['full_time'][3]
-		d = ret['full_time'][5]
-		month = ret['full_time'][6]
-		year = ret['full_time'][7]
+		sec = ret['m_full_time'][1]
+		minute = ret['m_full_time'][2]
+		hr = ret['m_full_time'][3]
+		d = ret['m_full_time'][5]
+		month = ret['m_full_time'][6]
+		year = ret['m_full_time'][7]
 
 		lsec = ret['last_full_time'][1]
 		lminute = ret['last_full_time'][2]

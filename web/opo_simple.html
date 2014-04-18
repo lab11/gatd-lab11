@@ -136,46 +136,49 @@
 	}
 
 	function addRangeEvent (data) {
-		rxid = data['rx_id'];
-		txid = data['tx_id'];
+		id = data['id'];
+		last_heard_id = data['last_heard_id'];
 		lseq = data['last_seq'];
 
-		if ('name' in data) name = data['name'];
-		else name = txid;
+        if ('full_name' in data) {
+            name = data['full_name'].split(" ")[0];
+        } else {
+            name = last_heard_id;
+        }
 
 		if ('color' in data) color = data['color'];
-		else color = get_color(txid);
+		else color = get_color(last_heard_id);
 
-		if (!(_.has(people, txid))) {
-			people[txid] = {};
-			people[txid]['color'] = color;
-			people[txid]['column'] = num_people;
-			people[txid]['name'] = name;
+		if (!(_.has(people, last_heard_id))) {
+			people[last_heard_id] = {};
+			people[last_heard_id]['color'] = color;
+			people[last_heard_id]['column'] = num_people;
+			people[last_heard_id]['name'] = name;
 			num_people++;
-			columns.push(txid);
+			columns.push(last_heard_id);
 
 		} else {
-			people[txid]['color'] = color;
-			people[txid]['name'] = name;
+			people[last_heard_id]['color'] = color;
+			people[last_heard_id]['name'] = name;
 		}
 
-		if (!(_.has(people, rxid))) {
-			people[rxid] = {};
-			people[rxid]['color'] = get_color(rxid);
-			people[rxid]['column'] = num_people;
-			people[rxid]['name'] = rxid;
+		if (!(_.has(people, id))) {
+			people[id] = {};
+			people[id]['color'] = get_color(id);
+			people[id]['column'] = num_people;
+			people[id]['name'] = id;
 			num_people++;
-			columns.push(rxid);
+			columns.push(id);
 		}
 
-		if (_.has(dedup, (txid + '' + rxid))) {
-			if (dedup[txid + '' + rxid] == data['last_full_timestamp']) {
+		if (_.has(dedup, (last_heard_id + '' + id))) {
+			if (dedup[last_heard_id + '' + id] == data['last_full_timestamp']) {
 				return;
 			}
 		}
-		dedup[txid + '' + rxid] = data['last_full_timestamp'];
+		dedup[last_heard_id + '' + id] = data['last_full_timestamp'];
 
-		ranges.push([txid, rxid, new Date(data['adjusted_last_full_timestamp']*1000), Math.round(data['range']*10)/10]);
+		ranges.push([last_heard_id, id, new Date(data['adjusted_last_full_timestamp']*1000), Math.round(data['range']*10)/10]);
 
 		draw();
 	}

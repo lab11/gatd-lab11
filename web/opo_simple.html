@@ -12,21 +12,76 @@
 	<script>WEB_SOCKET_SWF_LOCATION='bower_components/socket.io-client/dist/WebSocketMain.swf'</script>
 
 	<link href="css/gatd_graph.css" media="all" rel="stylesheet" type="text/css" />
+	<link href="bower_components/bootstrap/dist/css/bootstrap.min.css" media="all" rel="stylesheet" type="text/css" />
+	<link href="bower_components/bootstrap/dist/css/bootstrap-theme.min.css" media="all" rel="stylesheet" type="text/css" />
+
+	<style>
+		body {
+			padding-top: 70px;
+		}
+		.page-title {
+			padding-top: 3px;
+			font-size: 28px;
+			font-weight: bold;
+			color: #0892D0;
+		}
+	</style>
 
 	<title>Opo</title>
 </head>
 
 <body>
-	<div id="headerBar">
-		<div style="width:1000px; margin:0 auto; text-align:center;">
-			<div style="float:left"><img src="images/BlockM-rball.png" height="50px" style="margin-top:5px;" /></div>
-			<div style="float:left; padding:6px 0 0 350px;">Opo</div>
+
+	<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+		<div class="container">
+			<div class="navbar-header page-title">
+				Opo
+			</div>
+			<div class="navbar-right hidden-xs" style="margin:8px 0 0 20px;">
+				<img src="/images/michigan.png" height="35px" />
+			</div>
+			<ul class="nav navbar-nav navbar-right">
+				<li><a href="http://lab11.eecs.umich.edu">Lab11</a>
+			</ul>
 		</div>
 	</div>
+
+
+
+	<div class="container">
+		<div class="page-header">
+			<h1>Opo <small>interaction tracking</small></h1>
+		</div>
+			<p>
+			Opo is a system for discovering <strong>real-life social networks</strong>.
+			Just as Facebook is able to build a web of online social
+			contact, Opo monitors distance and duration of in-person
+			interactions. Users simply wear a small badge as a lanyard or
+			pin and Opo takes care of the rest. No additional devices
+			need to be deployed.
+			</p>
+			<p>
+			By using both an ultrasonic transducer and an RF radio, Opo
+			is able to significantly improve on existing interaction monitoring
+			approaches by
+			being smaller, easier to deploy, more accurate, and providing
+			higher temporal fidelity data.
+			<p>
+			The following live demonstration shows interactions occurring
+			in real-time. Each user is represented by a colored dot. Each arrow
+			represents a ranging event between two users and the number above
+			the arrow is the distance between the users in meters.
+			</p>
+
+	</div>
+
+
+
+
 	<div id="body">
 		<div>
-			<canvas id="contact_canvas" width="1600" height="1120"
-				style="z-index: 1; position:absolute; top:100px; right: 0; left: 0; margin-right: auto; margin-left: auto;"></canvas>
+			<canvas id="contact_canvas" width="1170" height="1120"
+				style="z-index: 1; position:absolute; top:300px; right: 0; left: 0; margin-right: auto; margin-left: auto;"></canvas>
 		</div>
 	</div>
 
@@ -34,7 +89,7 @@
 	var OPO_PID = '4wbddZCSIj';
 	var socket_loc;
 
-	var WIDTH    = 1600;
+	var WIDTH    = 1170;
 	var PX_SCALE = 10;
 	var ROWS     = 39;
 
@@ -103,8 +158,12 @@
 
 		context.clearRect(0, HEADER_HEIGHT, WIDTH, BODY_HEIGHT);
 
+		if (ranges.length == 0) {
+			draw_text(context, "Waiting on data...", 50, HEADER_HEIGHT-30, 'left');
+		}
+
 		for (i=ranges.length-1; i>0 && i>ranges.length-ROWS; i--) {
-            // last_heard_id transmitted to id
+			// last_heard_id transmitted to id
 			last_heard_id = ranges[i][0];
 			id = ranges[i][1];
 			timestamp = ranges[i][2];
@@ -137,18 +196,11 @@
 		last_heard_id = data['last_heard_id'];
 		lseq = data['last_seq'];
 
-        // If this packet has a last_heard_id of 0, it means that the opo just
-        //  restarted and this packet is invalid
-        if (last_heard_id == 0 || last_heard_id == '0') {
-            //console.log("SKIPPED");
-            return;
-        }
-
-        if ('full_name' in data) {
-            name = data['full_name'].split(" ")[0];
-        } else {
-            name = id;
-        }
+		if ('full_name' in data) {
+			name = data['full_name'].split(" ")[0];
+		} else {
+			name = id;
+		}
 
 		if ('color' in data) color = data['color'];
 		else color = get_color(id);
@@ -164,6 +216,12 @@
 		} else {
 			people[id]['color'] = color;
 			people[id]['name'] = name;
+		}
+
+		// If this packet has a last_heard_id of 0, it means that the opo just
+		//  restarted and this packet is an invalid range
+		if (last_heard_id == 0 || last_heard_id == '0') {
+			return;
 		}
 
 		if (!(_.has(people, last_heard_id))) {
@@ -191,14 +249,16 @@
 		socket_loc = io.connect('inductor.eecs.umich.edu:8082/stream');
 		socket_loc.on('connect', function (data) {
 			socket_loc.emit('query', {'profile_id':       OPO_PID,
-		                              '_processor_count': 0
-		                             });
+									  '_processor_count': 0
+									 });
 		});
 
 		socket_loc.on('data', function (data) {
 			addRangeEvent(data);
 		});
 	}
+
+	draw();
 
 	</script>
 

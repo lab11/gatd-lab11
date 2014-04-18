@@ -137,6 +137,13 @@
 		last_heard_id = data['last_heard_id'];
 		lseq = data['last_seq'];
 
+        // If this packet has a last_heard_id of 0, it means that the opo just
+        //  restarted and this packet is invalid
+        if (last_heard_id == 0 || last_heard_id == '0') {
+            //console.log("SKIPPED");
+            return;
+        }
+
         if ('full_name' in data) {
             name = data['full_name'].split(" ")[0];
         } else {
@@ -145,10 +152,6 @@
 
 		if ('color' in data) color = data['color'];
 		else color = get_color(id);
-
-        if (name == 0 || name == '0') {
-            console.log("Found 0 user\n Pkt data= " + pkt);
-        }
 
 		if (!(_.has(people, id))) {
 			people[id] = {};

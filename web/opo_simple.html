@@ -146,6 +146,10 @@
 		if ('color' in data) color = data['color'];
 		else color = get_color(id);
 
+        if (name == 0 || name == '0') {
+            console.log("Found 0 user\n Pkt data= " + pkt);
+        }
+
 		if (!(_.has(people, id))) {
 			people[id] = {};
 			people[id]['color'] = color;

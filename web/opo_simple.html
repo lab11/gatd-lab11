@@ -258,7 +258,11 @@
 		});
 	}
 
+	// Draw the initial canvas so something appears
 	draw();
+
+	// Make the timestamps update as data sits
+	var updater_interval = setInterval(function(){draw()}, 2000);
 
 	</script>
 

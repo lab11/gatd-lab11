@@ -104,17 +104,14 @@
 		context.clearRect(0, HEADER_HEIGHT, WIDTH, BODY_HEIGHT);
 
 		for (i=ranges.length-1; i>0 && i>ranges.length-ROWS; i--) {
-			// tx = 'tx_id' key, which is the Opo that sent the
-			// packet received by gatd. This packet is the last
-			// range that was _received_ by this node, so the arrow
-			// for visualization is drawn rx --> tx (x2 --> x1).
-			tx = ranges[i][0];
-			rx = ranges[i][1];
+            // last_heard_id transmitted to id
+			last_heard_id = ranges[i][0];
+			id = ranges[i][1];
 			timestamp = ranges[i][2];
 			range     = ranges[i][3];
 			y = ROW_TOP_MARGIN + (ROW_SPACING*(ranges.length-i-1)) + HEADER_HEIGHT;
-			x1 = people[tx]['column']*COLUMN_SPACING+COLUMN_LEFT_MARGIN;
-			x2 = people[rx]['column']*COLUMN_SPACING+COLUMN_LEFT_MARGIN;
+			x1 = people[last_heard_id]['column']*COLUMN_SPACING+COLUMN_LEFT_MARGIN;
+			x2 = people[id]['column']*COLUMN_SPACING+COLUMN_LEFT_MARGIN;
 
 			// 15 = radius of circle (10) + 1/2 arrowhead size (5)
 			context.strokeStyle = '#ccc';
@@ -127,8 +124,8 @@
 				draw_arrow(context, [x1, y], [x2+15, y], true);
 			}
 
-			draw_circle(context, x1, y, 10, people[tx]['color']);
-			draw_circle(context, x2, y, 10, people[rx]['color']);
+			draw_circle(context, x1, y, 10, people[last_heard_id]['color']);
+			draw_circle(context, x2, y, 10, people[id]['color']);
 
 			draw_text(context, prettyDate(timestamp), 10, y, 'left');
 			draw_text(context, range, (x1+x2)/2, y-1, 'center');
@@ -143,40 +140,40 @@
         if ('full_name' in data) {
             name = data['full_name'].split(" ")[0];
         } else {
-            name = last_heard_id;
+            name = id;
         }
 
 		if ('color' in data) color = data['color'];
-		else color = get_color(last_heard_id);
-
-		if (!(_.has(people, last_heard_id))) {
-			people[last_heard_id] = {};
-			people[last_heard_id]['color'] = color;
-			people[last_heard_id]['column'] = num_people;
-			people[last_heard_id]['name'] = name;
-			num_people++;
-			columns.push(last_heard_id);
-
-		} else {
-			people[last_heard_id]['color'] = color;
-			people[last_heard_id]['name'] = name;
-		}
+		else color = get_color(id);
 
 		if (!(_.has(people, id))) {
 			people[id] = {};
-			people[id]['color'] = get_color(id);
+			people[id]['color'] = color;
 			people[id]['column'] = num_people;
-			people[id]['name'] = id;
+			people[id]['name'] = name;
 			num_people++;
 			columns.push(id);
+
+		} else {
+			people[id]['color'] = color;
+			people[id]['name'] = name;
 		}
 
-		if (_.has(dedup, (last_heard_id + '' + id))) {
-			if (dedup[last_heard_id + '' + id] == data['last_full_timestamp']) {
+		if (!(_.has(people, last_heard_id))) {
+			people[last_heard_id] = {};
+			people[last_heard_id]['color'] = get_color(last_heard_id);
+			people[last_heard_id]['column'] = num_people;
+			people[last_heard_id]['name'] = last_heard_id;
+			num_people++;
+			columns.push(last_heard_id);
+		}
+
+		if (_.has(dedup, (last_heard_id + '|' + id))) {
+			if (dedup[last_heard_id + '|' + id] == data['last_full_timestamp']) {
 				return;
 			}
 		}
-		dedup[last_heard_id + '' + id] = data['last_full_timestamp'];
+		dedup[last_heard_id + '|' + id] = data['last_full_timestamp'];
 
 		ranges.push([last_heard_id, id, new Date(data['adjusted_last_full_timestamp']*1000), Math.round(data['range']*10)/10]);
 

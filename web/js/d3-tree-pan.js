@@ -403,6 +403,26 @@ treeJSON = d3.json("http://inductor.eecs.umich.edu:8085/explore/all", function(e
             })
             .style("fill-opacity", 0);
 
+        nodeEnter.append("text")
+            .attr("x", 10)
+            .attr("dy", ".35em")
+            .attr('class', 'nodeText')
+            .attr("text-anchor", "start")
+            .text(function(d) {
+                var num = 0
+                if ('children' in d) {
+                    num = d.children.length;
+                } else if ('_children' in d) {
+                    num = d._children.length;
+                }
+                if (num > 10) {
+                    return num;
+                } else {
+                    return '';
+                }
+            })
+            .style("fill-opacity", 0);
+
         // phantom node to give us mouseover in a radius around it
         nodeEnter.append("circle")
             .attr('class', 'ghostCircle')
@@ -444,7 +464,7 @@ treeJSON = d3.json("http://inductor.eecs.umich.edu:8085/explore/all", function(e
             });
 
         // Fade the text in
-        nodeUpdate.select("text")
+        nodeUpdate.selectAll("text")
             .style("fill-opacity", 1);
 
         // Transition exiting nodes to the parent's new position.

@@ -20,8 +20,6 @@ function draw_circle (context, x, y, radius_in_px, color) {
 
 function draw_line(context, start, end) {
 	context.beginPath();
-	//console.log(start);
-	//console.log(end);
 	context.moveTo(start[0], start[1]);
 	context.lineTo(end[0], end[1]);
 	context.stroke();
@@ -33,9 +31,6 @@ function findAngle(p1, p2) {
 }
 
 function draw_arrowhead(ctx, locx, locy, angle, sizex, sizey, fill) {
-	console.log("draw_arrowhead at (" + locx + "," + locy + ") angle " +
-			angle + " with arrow size (" + sizex + "," + sizey +
-			") and fill is " + fill);
 	var hx = sizex / 2;
 	var hy = sizey / 2;
 	ctx.translate((locx ), (locy));
@@ -71,6 +66,5 @@ function draw_arrow(context, start, end, fill, length_xy_x, length_y) {
 
 	draw_line(context, start, end);
 	angle = findAngle(start, end);
-	//console.log("angle: " + angle);
 	draw_arrowhead(context, end[0], end[1], angle, length_xy_x, length_y, fill);
 }

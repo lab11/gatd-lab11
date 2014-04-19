@@ -8,10 +8,11 @@ from sh import bower
 
 
 # First update bower
+print("Updating bower...")
 bower('install')
 
 
-
+print("Building website...")
 jinja_env = jinja.Environment(loader=jinja.FileSystemLoader(['.', 'templates']))
 
 for filename in glob.glob('./*.jinja'):

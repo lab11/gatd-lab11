@@ -17,9 +17,9 @@ Lab11 Demos from GATD
 <h1>Lab11 GATD Demos</h1>
 </div>
 
-<div class="list-group">
-{{ demos }}
-</div>
+{% for category in categories %}
+  {{ category }}
+{% endfor %}
 
 </div>
 

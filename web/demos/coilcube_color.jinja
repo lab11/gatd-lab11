@@ -1,45 +1,43 @@
-<html>
-<head>
-	<script src="bower_components/socket.io-client/dist/socket.io.min.js"></script>
-	<script src="bower_components/jquery/dist/jquery.min.js"></script>
-	<script src="bower_components/jquery.ui/ui/jquery.ui.core.js"></script>
-	<script src="js/jquery.flot.custom-0.8.2.js"></script>
-	<script src="bower_components/flot/jquery.flot.time.js"></script>
-	<script src="bower_components/underscore/underscore.js"></script>
-	<script src="js/jquery.grapher.js"></script>
-	<script>WEB_SOCKET_SWF_LOCATION='bower_components/socket.io-client/dist/WebSocketMain.swf'</script>
+{#
 
-	<title>Monjolo</title>
+COILCUBE_COLOR
+
+#}
+
+{% extends "base_intro.jinja" %}
+
+{% block includes %}
+<script src="/bower_components/jquery.ui/ui/jquery.ui.core.js"></script>
+<script src="/js/jquery.flot.custom-0.8.2.js"></script>
+<script src="/bower_components/flot/jquery.flot.time.js"></script>
+<script src="/js/jquery.grapher.js"></script>
+{% endblock %}
+
+{% block title %}
+Monjolo
+{% endblock %}
+
+{% block page_title %}
+Monjolo
+{% endblock %}
+
+{% block tagline %}
+Energy-harvesting energy meters
+{% endblock %}
+
+{% block information %}
+<p>
+<a href="http://lab11.eecs.umich.edu/projects/monjolo">Monjolo</a> nodes are
+true battery-less energy-harvesting sensors. These sensors exploit the property
+that many real-world entites that are desirable to measure emit <em>side-channels</em>
+of harvestable energy.
+</p>
+{% endblock %}
+
+{% block header %}
+	{{ super() }}
 
 	<style type="text/css">
-		body {
-			margin: 0;
-			padding: 0;
-		}
-		#body {
-			text-align: center;
-		}
-		h1 {
-			font-family: "helvetica";
-			font-size: 28pt;
-			margin-bottom: 0;
-		}
-		h2 {
-			font-family: "helvetica";
-			font-size: 24pt;
-			margin: 10px 0 10px 0;
-			padding: 0;
-		}
-		#headerBar {
-			height: 60px;
-			background: #00274c;
-			color: #fff;
-			font-family: Tahoma, Geneva, sans-serif;
-			font-size: 28pt;
-		}
-		#headerBar div {
-			padding-left:-75px;
-		}
 		#power_meters {
 		}
 		.pm {
@@ -150,47 +148,40 @@
 		}
 	</style>
 
+{% endblock %}
 
-</head>
-
-<body>
-	<div id="headerBar">
-		<div style="width:1000px; margin:0 auto; text-align:center;">
-			<div style="float:left"><img src="images/BlockM-rball.png" height="50px" style="margin-top:5px;" /></div>
-			<div style="float:left; padding:6px 0 0 350px;">Monjolo</div>
-		</div>
-	</div>
+{% block content %}
 	<div id="body">
 		<div id="graph" class="box_shadow graph graph1"></div>
 		<div id="graph2" class="box_shadow graph graph2"></div>
 
 		<div id="coilcubes" class="box_shadow box_white">
 			<div id="cc_blue" class="coilcube">
-				<img src="images/coilcube_blue.png" />
+				<img src="/images/coilcube_blue.png" />
 			</div>
 			<div id="cc_red" class="coilcube">
-				<img src="images/coilcube_red.png" />
+				<img src="/images/coilcube_red.png" />
 			</div>
 			<div id="cc_purple" class="coilcube">
-				<img src="images/coilcube_purple.png" />
+				<img src="/images/coilcube_purple.png" />
 			</div>
 			<div id="cc_silver" class="coilcube">
-				<img src="images/coilcube_silver.png" />
+				<img src="/images/coilcube_silver.png" />
 			</div>
 			<div id="cc_yellow" class="coilcube">
-				<img src="images/coilcube_yellow.png" />
+				<img src="/images/coilcube_yellow.png" />
 			</div>
 			<div id="cc_orange" class="coilcube">
-				<img src="images/coilcube_orange.png" />
+				<img src="/images/coilcube_orange.png" />
 			</div>
 			<div id="cc_green" class="coilcube">
-				<img src="images/coilcube_green.png" />
+				<img src="/images/coilcube_green.png" />
 			</div>
 			<div id="cc_pink" class="coilcube">
-				<img src="images/split_core_pink.png" />
+				<img src="/images/split_core_pink.png" />
 			</div>
 			<div id="cc_teal" class="coilcube">
-				<img src="images/gkps_impluse_teal.png" class="gkps" />
+				<img src="/images/gkps_impluse_teal.png" class="gkps" />
 			</div>
 			<div id="wup"></div>
 		</div>
@@ -378,7 +369,4 @@
 	}
 	</script>
 
-
-</body>
-</html>
-
+{% endblock %}

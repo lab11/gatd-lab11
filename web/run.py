@@ -2,14 +2,16 @@
 
 import glob
 import jinja2 as jinja
+import sys
 import os
 from sh import bower
 
 
 
 # First update bower
-print("Updating bower...")
-bower('install')
+if '--no-bower' not in sys.argv:
+	print("Updating bower...")
+	bower('install')
 
 
 print("Building website...")

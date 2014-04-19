@@ -1,16 +1,16 @@
 <html>
 <head>
-	<script src="bower_components/socket.io-client/dist/socket.io.min.js"></script>
-	<script src="bower_components/jquery/dist/jquery.min.js"></script>
-	<script src="bower_components/jsIP/jsIP.js"></script>
-	<script src="bower_components/bignumber.js/bignumber.min.js"></script>
-	<script>WEB_SOCKET_SWF_LOCATION='bower_components/socket.io-client/dist/WebSocketMain.swf'</script>
-	<title>Real-time monitor of shed commits</title>
+	<script src="/bower_components/socket.io-client/dist/socket.io.min.js"></script>
+	<script src="/bower_components/jquery/dist/jquery.min.js"></script>
+	<script src="/bower_components/jsIP/jsIP.js"></script>
+	<script src="/bower_components/bignumber.js/bignumber.min.js"></script>
+	<script>WEB_SOCKET_SWF_LOCATION='/bower_components/socket.io-client/dist/WebSocketMain.swf'</script>
+	<title>Coilcube Frequency Stream</title>
 
 </head>
 
 <body>
-	<h1>Real-time monitor of shed commits</h1>
+	<h1>Coilcube Frequency Stream</h1>
 
 	<script>
 
@@ -21,9 +21,9 @@
 		out += "<span>Address: " + IP("0x"+BigNumber(data['address']).toString(16)).pureStr() + "</span>";
 		out += "<ul>";
 		for (var key in data) {
-			if (key != 'address' && key != '_id' && key != 'profile_id') {
-				if (key == 'time') {
-					title = 'time';
+			if (key != 'address' && key != '_id') {
+				if (key == 'timestamp') {
+					title = 'Time';
 					var date = new Date(data[key]);
 					value = date.getFullYear() + "/" + (date.getMonth()+1) + "/" + date.getDate() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
 				} else {
@@ -38,17 +38,14 @@
 	}
 
 	onload = function() {
-		socket = io.connect('inductor.eecs.umich.edu:8082/stream');
+		socket = io.connect('inductor.eecs.umich.edu:8080/stream');
 		socket.on('connect', function (data) {
-			socket.emit('query', {'profile_id': '1ceFS5btOV',
-			                      'time': 20000000});
+			socket.emit('query', {'profile_id': '7aiOPJapXF', '_processor_freq':'last'});
 		});
 
 		socket.on('data', function (data) {
 			$("div#stream").prepend(display_data(data));
 		});
-
-
 	}
 	</script>
 

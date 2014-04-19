@@ -17,7 +17,7 @@ if '--no-bower' not in sys.argv:
 print("Building website...")
 jinja_env = jinja.Environment(loader=jinja.FileSystemLoader(['.', 'templates']))
 
-DIRECTORIES = ('demos', '.')
+DIRECTORIES = ('demos', 'raw', '.')
 
 for directory in DIRECTORIES:
 	for filename in glob.glob(directory + '/*.jinja'):

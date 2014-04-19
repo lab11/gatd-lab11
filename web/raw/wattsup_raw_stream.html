@@ -1,22 +1,25 @@
 <html>
 <head>
-	<script src="bower_components/socket.io-client/dist/socket.io.min.js"></script>
-	<script src="bower_components/jquery/dist/jquery.min.js"></script>
-	<script src="bower_components/jsIP/jsIP.js"></script>
-	<script src="bower_components/bignumber.js/bignumber.min.js"></script>
-	<script>WEB_SOCKET_SWF_LOCATION='bower_components/socket.io-client/dist/WebSocketMain.swf'</script>
-	<title>Coilcube Frequency Stream</title>
+	<script src="/bower_components/socket.io-client/dist/socket.io.min.js"></script>
+	<script src="/bower_components/jquery/dist/jquery.min.js"></script>
+	<script src="/bower_components/jsIP/jsIP.js"></script>
+	<script src="/bower_components/bignumber.js/bignumber.min.js"></script>
+	<script>WEB_SOCKET_SWF_LOCATION='/bower_components/socket.io-client/dist/WebSocketMain.swf'</script>
+
+	<title>Watts Up?.net Stream</title>
 
 </head>
 
 <body>
-	<h1>Coilcube Frequency Stream</h1>
+	<h1>Watts Up?.net Stream</h1>
 
 	<script>
 
 	var socket;
 
 	function display_data (data) {
+		console.log(data);
+		console.log("0x"+BigNumber(data['address']).toString(16));
 		out = "<div>";
 		out += "<span>Address: " + IP("0x"+BigNumber(data['address']).toString(16)).pureStr() + "</span>";
 		out += "<ul>";
@@ -40,12 +43,13 @@
 	onload = function() {
 		socket = io.connect('inductor.eecs.umich.edu:8080/stream');
 		socket.on('connect', function (data) {
-			socket.emit('query', {'profile_id': '7aiOPJapXF', '_processor_freq':'last'});
+			socket.emit('query', {'profile_id': 'YWUr2G8AZP'});
 		});
 
 		socket.on('data', function (data) {
 			$("div#stream").prepend(display_data(data));
 		});
+
 	}
 	</script>
 

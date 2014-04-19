@@ -1,18 +1,15 @@
 #!/usr/bin/env python3
 
-
-#import mako.template
-#import mako.lookup
-#template_lookup = mako.lookup.TemplateLookup(directories=['templates'])
-#t = mako.template.Template(filename='opo_simple.mako', lookup=template_lookup)
-#print(t.render())
-
-
-
-
 import glob
 import jinja2 as jinja
 import os
+from sh import bower
+
+
+
+# First update bower
+bower('install')
+
 
 
 jinja_env = jinja.Environment(loader=jinja.FileSystemLoader(['.', 'templates']))
@@ -25,3 +22,13 @@ for filename in glob.glob('./*.jinja'):
 
 	with open(outputname, 'w') as f:
 		f.write(output)
+
+
+demo_list = ''
+for filename in sorted(glob.glob('*.html')):
+	name = os.path.splitext(os.path.basename(filename))[0].title()
+	demo_list += jinja_env.get_template('demo_item.jinja').render(name=name, path=filename)
+
+index = jinja_env.get_template('index.jinja').render(demos=demo_list)
+with open('index.html', 'w') as f:
+	f.write(index)

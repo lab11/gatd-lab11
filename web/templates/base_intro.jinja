@@ -1,0 +1,14 @@
+{% extends "base.jinja" %}
+
+{% block body %}
+	<div class="container">
+		<div class="page-header">
+			<h1> {% block page_title %}{% endblock %} <small> {% block tagline %}{% endblock %} </small></h1>
+		</div>
+		{% block information %}{% endblock %}
+	</div>
+
+{%block content %}
+{% endblock %}
+
+{% endblock %}

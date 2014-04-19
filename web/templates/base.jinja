@@ -1,0 +1,43 @@
+<html>
+<head>
+	{% block header %}
+
+	<script src="bower_components/socket.io-client/dist/socket.io.min.js"></script>
+	<script src="bower_components/jquery/dist/jquery.min.js"></script>
+	<script src="bower_components/underscore/underscore.js"></script>
+	<script>WEB_SOCKET_SWF_LOCATION='bower_components/socket.io-client/dist/WebSocketMain.swf'</script>
+	<link href="bower_components/bootstrap/dist/css/bootstrap.min.css" media="all" rel="stylesheet" type="text/css" />
+	<link href="bower_components/bootstrap/dist/css/bootstrap-theme.min.css" media="all" rel="stylesheet" type="text/css" />
+	<link href="css/base.css" media="all" rel="stylesheet" type="text/css" />
+
+	{% block includes %}
+	{% endblock %}
+
+	<title>{% block title %}{% endblock %}</title>
+
+	{% endblock %}
+</head>
+
+<body>
+
+	{# Include the top navbar #}
+	<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+		<div class="container">
+			<div class="navbar-header page-title">
+				{% block page_title %}{% endblock %}
+			</div>
+			<div class="navbar-right hidden-xs" style="margin:8px 0 0 20px;">
+				<img src="/images/michigan.png" height="35px" />
+			</div>
+			<ul class="nav navbar-nav navbar-right">
+				<li><a href="http://lab11.eecs.umich.edu">Lab11</a>
+			</ul>
+		</div>
+	</div>
+
+
+	{% block body %}{% endblock %}
+
+
+</body>
+</html>

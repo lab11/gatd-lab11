@@ -1,0 +1,244 @@
+{#
+
+OPO_SIMPLE
+
+#}
+
+{% extends "base_intro.jinja" %}
+
+{% block includes %}
+<script src="js/gatd_graph.js"></script>
+<script src="js/gatd_canvas.js"></script>
+<script src="js/pretty.js"></script>
+<script src="js/pretty.js"></script>
+{% endblock %}
+
+{% block title %}
+Opo
+{% endblock %}
+
+{% block page_title %}
+Opo
+{% endblock %}
+
+{% block tagline %}
+interaction tracking
+{% endblock %}
+
+
+{% block information %}
+<p>
+Opo is a system for discovering <strong>real-life social networks</strong>.
+Just as Facebook is able to build a web of online social
+contact, Opo monitors distance and duration of in-person
+interactions. Users simply wear a small badge as a lanyard or
+pin and Opo takes care of the rest. No additional devices
+need to be deployed.
+</p>
+<p>
+By using both an ultrasonic transducer and an RF radio, Opo
+is able to significantly improve on existing interaction monitoring
+approaches by
+being smaller, easier to deploy, more accurate, and providing
+higher temporal fidelity data.
+<p>
+The following live demonstration shows interactions occurring
+in real-time. Each user is represented by a colored dot. Each arrow
+represents a ranging event between two users and the number above
+the arrow is the distance between the users in meters.
+</p>
+{% endblock %}
+
+
+
+{% block content %}
+
+	<div id="body">
+		<div>
+			<canvas id="contact_canvas" width="1170" height="1120"
+				style="z-index: 1; position:absolute; top:300px; right: 0; left: 0; margin-right: auto; margin-left: auto;"></canvas>
+		</div>
+	</div>
+
+	<script>
+	var OPO_PID = '4wbddZCSIj';
+	var socket_loc;
+
+	var WIDTH    = 1170;
+	var PX_SCALE = 10;
+	var ROWS     = 39;
+
+	var HEADER_HEIGHT = 120;
+	var HEADER_DOT_TOP_MARGIN = 75;
+	var HEADER_NAME_TOP_MARGIN = 110;
+
+	var BODY_HEIGHT = 1000;
+
+	var COLUMN_LEFT_MARGIN = 150;
+	var COLUMN_SPACING = 50;
+
+	var ROW_TOP_MARGIN = 50;
+	var ROW_SPACING = 25;
+
+	var contact_canvas = document.getElementById('contact_canvas');
+
+	contact_canvas.width  = WIDTH;
+	contact_canvas.height = HEADER_HEIGHT + BODY_HEIGHT;
+
+	var num_people = 0;
+	var people = {};
+	var columns = [];
+	var ranges = [];
+	var dedup = {};
+
+	var loc_hist = Array();
+	var age_out = 15000; //1000 * 60 * 5;
+
+	function draw_text (context, text, x, y, align) {
+		context.textAlign = align;
+		context.strokeStyle = '#000';
+		context.fillStyle = '#000';
+		context.fillText(text, x, y);
+	}
+
+	function draw_gray_line(context, x1, y1, x2, y2) {
+		context.strokeStyle = '#ccc';
+		context.fillStyle = '#ccc';
+		draw_solid_line(context, x1, y1, x2, y2);
+	}
+
+	function draw_header (context) {
+
+		// Clear header
+		context.clearRect(0, 0, WIDTH, HEADER_HEIGHT);
+
+		// Draw line to separate header
+		draw_gray_line(context, 0, HEADER_HEIGHT, WIDTH, HEADER_HEIGHT);
+
+		// Draw header dots and names
+		for (i=0; i<columns.length; i++) {
+			pid = columns[i];
+			x = COLUMN_LEFT_MARGIN + i*COLUMN_SPACING;
+			y = HEADER_DOT_TOP_MARGIN;
+			draw_circle(context, x, y, 10, people[pid]['color']);
+
+			draw_text(context, people[pid]['name'], x, HEADER_NAME_TOP_MARGIN, 'center');
+		}
+	}
+
+	function draw () {
+		var context = contact_canvas.getContext('2d');
+
+		draw_header(context);
+
+		context.clearRect(0, HEADER_HEIGHT, WIDTH, BODY_HEIGHT);
+
+		if (ranges.length == 0) {
+			draw_text(context, "Waiting on data...", 50, HEADER_HEIGHT-30, 'left');
+		}
+
+		for (i=ranges.length-1; i>0 && i>ranges.length-ROWS; i--) {
+			// last_heard_id transmitted to id
+			last_heard_id = ranges[i][0];
+			id = ranges[i][1];
+			timestamp = ranges[i][2];
+			range     = ranges[i][3];
+			y = ROW_TOP_MARGIN + (ROW_SPACING*(ranges.length-i-1)) + HEADER_HEIGHT;
+			x1 = people[last_heard_id]['column']*COLUMN_SPACING+COLUMN_LEFT_MARGIN;
+			x2 = people[id]['column']*COLUMN_SPACING+COLUMN_LEFT_MARGIN;
+
+			// 15 = radius of circle (10) + 1/2 arrowhead size (5)
+			context.strokeStyle = '#ccc';
+			context.fillStyle = '#ccc';
+			if (x1 < x2) {
+				// Arrow points left
+				draw_arrow(context, [x1, y], [x2-15, y], true);
+			} else {
+				// Arrow points right
+				draw_arrow(context, [x1, y], [x2+15, y], true);
+			}
+
+			draw_circle(context, x1, y, 10, people[last_heard_id]['color']);
+			draw_circle(context, x2, y, 10, people[id]['color']);
+
+			draw_text(context, prettyDate(timestamp), 10, y, 'left');
+			draw_text(context, range, (x1+x2)/2, y-1, 'center');
+		}
+	}
+
+	function addRangeEvent (data) {
+		id = data['id'];
+		last_heard_id = data['last_heard_id'];
+		lseq = data['last_seq'];
+
+		if ('full_name' in data) {
+			name = data['full_name'].split(" ")[0];
+		} else {
+			name = id;
+		}
+
+		if ('color' in data) color = data['color'];
+		else color = get_color(id);
+
+		if (!(_.has(people, id))) {
+			people[id] = {};
+			people[id]['color'] = color;
+			people[id]['column'] = num_people;
+			people[id]['name'] = name;
+			num_people++;
+			columns.push(id);
+
+		} else {
+			people[id]['color'] = color;
+			people[id]['name'] = name;
+		}
+
+		// If this packet has a last_heard_id of 0, it means that the opo just
+		//  restarted and this packet is an invalid range
+		if (last_heard_id == 0 || last_heard_id == '0') {
+			return;
+		}
+
+		if (!(_.has(people, last_heard_id))) {
+			people[last_heard_id] = {};
+			people[last_heard_id]['color'] = get_color(last_heard_id);
+			people[last_heard_id]['column'] = num_people;
+			people[last_heard_id]['name'] = last_heard_id;
+			num_people++;
+			columns.push(last_heard_id);
+		}
+
+		if (_.has(dedup, (last_heard_id + '|' + id))) {
+			if (dedup[last_heard_id + '|' + id] == data['last_full_timestamp']) {
+				return;
+			}
+		}
+		dedup[last_heard_id + '|' + id] = data['last_full_timestamp'];
+
+		ranges.push([last_heard_id, id, new Date(data['adjusted_last_full_timestamp']*1000), Math.round(data['range']*10)/10]);
+
+		draw();
+	}
+
+	onload = function() {
+		socket_loc = io.connect('inductor.eecs.umich.edu:8082/stream');
+		socket_loc.on('connect', function (data) {
+			socket_loc.emit('query', {'profile_id':       OPO_PID,
+									  '_processor_count': 0
+									 });
+		});
+
+		socket_loc.on('data', function (data) {
+			addRangeEvent(data);
+		});
+	}
+
+	// Draw the initial canvas so something appears
+	draw();
+
+	// Make the timestamps update as data sits
+	var updater_interval = setInterval(function(){draw()}, 2000);
+
+	</script>
+
+{% endblock %}

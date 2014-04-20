@@ -4,8 +4,10 @@ import glob
 import jinja2 as jinja
 import sys
 import os
+import sh
 from sh import bower
-
+from sh import cp
+from sh import rm
 
 
 # First update bower
@@ -33,19 +35,25 @@ build queries yourself, check out the "Streams" demo above!""",
 }
 
 for directory in DIRECTORIES:
+	rm('-f', sh.glob(directory + '/built/*'))
 	for filename in glob.glob(directory + '/*.jinja'):
-		basename = os.path.splitext(filename)[0]
-		outputname = basename + '.html'
+		basedir, name = os.path.split(filename)
+		name = os.path.splitext(name)[0]
+		outputname = os.path.join(basedir, 'built', name + '.html')
 
 		output = jinja_env.get_template(filename).render()
 
 		with open(outputname, 'w') as f:
 			f.write(output)
+	for filename in glob.glob(directory + '/*.html'):
+		basedir, name = os.path.split(filename)
+		dst = os.path.join(basedir, 'built', name)
+		cp(filename, dst)
 
 categories = []
 for directory in DIRECTORIES:
 	demo_list = ''
-	for filename in sorted(glob.glob(directory + '/*.html')):
+	for filename in sorted(glob.glob(directory + '/built/*.html')):
 		name = os.path.splitext(os.path.basename(filename))[0].title()
 		demo_list += jinja_env.get_template('demo_item.jinja').render(name=name, path=filename)
 	category = jinja_env.get_template('demo_category.jinja').render(

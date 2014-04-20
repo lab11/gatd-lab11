@@ -25,7 +25,7 @@ DESCRIPTIONS = {
 Polished pseudo-production demos. While liable to go down at any time (this is
 research after all!), these are projects in a more-or-less "working" state.""",
 		'work-in-progress':"""\
-New projects we're working on building right now. Very hit-or-miss if these will
+New projects we're working on building right now. Can be hit-or-miss if these will
 be working at any given time. Don't rely on these pages if you're showing
 something off ;)""",
 		'raw':"""\

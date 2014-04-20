@@ -1,41 +1,46 @@
-<html>
-<head>
-	<script src="bower_components/socket.io-client/dist/socket.io.min.js"></script>
-	<script src="bower_components/jquery/dist/jquery.min.js"></script>
-	<script src="js/jquery.flot.custom-0.8.2.js"></script>
-	<script src="bower_components/flot/jquery.flot.time.js"></script>
-	<script src="bower_components/underscore/underscore.js"></script>
-	<script src="js/jquery.grapher.js"></script>
-	<script src="js/gatd_graph.js"></script>
-	<script src="js/gatd_canvas.js"></script>
-	<script>WEB_SOCKET_SWF_LOCATION='bower_components/socket.io-client/dist/WebSocketMain.swf'</script>
+{#
 
-	<link href="css/gatd_graph.css" media="all" rel="stylesheet" type="text/css" />
+LOC_VLC_SIMPLE
 
-	<title>VLC Location - Simple Grid</title>
-</head>
+#}
 
-<body>
-	<div id="headerBar">
-		<div style="width:1000px; margin:0 auto; text-align:center;">
-			<div style="float:left"><img src="images/BlockM-rball.png" height="50px" style="margin-top:5px;" /></div>
-			<div style="float:left; padding:6px 0 0 350px;">VLC Location - Simple Grid</div>
-		</div>
-	</div>
+{% extends "base.jinja" %}
+
+{% block includes %}
+<script src="/js/gatd_canvas.js"></script>
+{% endblock %}
+
+{% block title %}
+VLC Location - Simple Grid
+{% endblock %}
+
+{% block page_title %}
+VLC Location
+{% endblock %}
+
+{% block body %}
 	<div id="body">
-		<div>
-			<input type="checkbox" checked="checked" id="cb_floor_pegboard">Show Floor Pegboard</input>
-			<input type="checkbox" checked="checked" id="cb_ceil_pegboard">Show Ceiling Pegboard</input>
-			<input type="checkbox" checked="checked" id="cb_train_track">Show Train Tracks</input>
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-2">
+					<input type="checkbox" checked="checked" id="cb_floor_pegboard">Show Floor Pegboard</input>
+				</div>
+				<div class="col-lg-2">
+					<input type="checkbox" checked="checked" id="cb_ceil_pegboard">Show Ceiling Pegboard</input>
+				</div>
+				<div class="col-lg-2">
+					<input type="checkbox" checked="checked" id="cb_train_track">Show Train Tracks</input>
+				</div>
+				<div class="col-lg-4">
+					<button onclick="onclick_replay_train()" class="btn btn-default">Replay Train Experiment (5x speed)</input>
+				</div>
+			</div>
 		</div>
 		<div>
 			<canvas id="grid_canvas" width="900" height="900"
-				style="z-index: 1; position:absolute; top:100px; right: 0; left: 0; margin-right: auto; margin-left: auto;"></canvas>
+				style="z-index: 1; position:absolute; top:150px; right: 0; left: 0; margin-right: auto; margin-left: auto;"></canvas>
 			<canvas id="dots_canvas" width="900" height="900"
-				style="z-index: 2; position:absolute; top:100px; right: 0; left: 0; margin-right: auto; margin-left: auto;"></canvas>
-		</div>
-		<div>
-			<button onclick="onclick_replay_train()">Replay Train Experiment (5x speed)</input>
+				style="z-index: 2; position:absolute; top:150px; right: 0; left: 0; margin-right: auto; margin-left: auto;"></canvas>
 		</div>
 		<!--
 		<div id="key" class="box_shadow key">
@@ -314,5 +319,4 @@
 	$('#cb_train_track').click(on_grid_cb_click);
 	</script>
 
-</body>
-</html>
+{% endblock %}

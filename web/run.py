@@ -171,7 +171,7 @@ class WhenChanged(pyinotify.ProcessEvent):
 
 		if self.exclude.match(basename):
 			return False
-		if 'built/' in path:
+		if 'built' in path:
 			return False
 		if '.git/' in path:
 			return False
@@ -186,11 +186,17 @@ class WhenChanged(pyinotify.ProcessEvent):
 		print('Rebuilding because {0} changed'.format(path))
 		return True
 
-	def process_IN_CLOSE_WRITE(self, event):
+	def process(self, event):
 		path = event.pathname
 		if self.is_interested(path):
 			build_site()
 			self.serve()
+
+	def process_IN_CREATE(self, event):
+		return self.process(event)
+
+	def process_IN_CLOSE_WRITE(self, event):
+		return self.process(event)
 
 	def run(self):
 		wm = pyinotify.WatchManager()

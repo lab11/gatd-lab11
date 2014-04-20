@@ -29,8 +29,15 @@ Energy-harvesting energy meters
 <p>
 <a href="http://lab11.eecs.umich.edu/projects/monjolo">Monjolo</a> nodes are
 true battery-less energy-harvesting sensors. These sensors exploit the property
-that many real-world entites that are desirable to measure emit <em>side-channels</em>
-of harvestable energy.
+that many real-world entities that are desirable to measure emit <em>side-channels</em>
+of harvestable energy. Monjolo nodes harvest this energy and opportunistically
+send packets when they have harvested enough energy. The resulting packet
+<em>frequency</em> of Monjolo nodes is proportional to the device being measured.
+</p>
+<p>
+This website was built for our
+<a href="http://sensys.acm.org/2013/pandd.html">demo at Sensys '13</a>. If we
+aren't actively demo-ing this system, it will likely not show anything interesting.
 </p>
 {% endblock %}
 

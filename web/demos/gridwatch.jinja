@@ -1,13 +1,50 @@
-<html>
-<head>
-	<script src="bower_components/leaflet/dist/leaflet.js"></script>
-	<script src="bower_components/socket.io-client/dist/socket.io.min.js"></script>
-	<script src="bower_components/jquery/dist/jquery.min.js"></script>
+{#
 
-	<link href="css/gatd_graph.css" media="all" rel="stylesheet" type="text/css" />
-	<link rel="stylesheet" href="bower_components/leaflet/dist/leaflet.css" />
+GRIDWATCH
 
-	<title>GridWatch</title>
+#}
+
+{% extends "base_intro.jinja" %}
+
+{% block includes %}
+<script src="/bower_components/leaflet/dist/leaflet.js"></script>
+<link rel="stylesheet" href="/bower_components/leaflet/dist/leaflet.css" />
+{% endblock %}
+
+{% block title %}
+GridWatch
+{% endblock %}
+
+{% block page_title %}
+GridWatch
+{% endblock %}
+
+{% block tagline %}
+Monitor the grid
+{% endblock %}
+
+{% block information %}
+<p>
+The power grid is one of humanity's most significant engineering undertakings
+and is a critical piece of the infrastruacture for modern life. Yet, there is
+very little ability for the average person, or even sometimes utilites, to see
+into grid health.
+</p>
+<p>
+The GridWatch project is a crowd-sourcing approach to this problem. By installing
+a simple, low-impact smartphone app, average users and contribute to the knowledge
+of global grid health. This map reports data on grid health coming back from our
+initial users. <span style="color:#0f0">Green circles</span> indicate a healthy
+grid report and <span style="color:#f00">red circles</span> identify locations
+where GridWatch believes there may be an issue.
+</p>
+<p>
+<a href="http://lab11.eecs.umich.edu/projects/gridwatch">GridWatch Project Homepage</a>
+</p>
+{% endblock %}
+
+{% block header %}
+	{{ super() }}
 
 	<style>
 	.info {
@@ -16,30 +53,10 @@
 		padding: 20px;
 	}
 	</style>
-</head>
+{% endblock %}
 
-<body>
-
-	<div id="headerBar">
-		<div style="width:1000px; margin:0 auto; text-align:center;">
-			<div style="float:left"><img src="images/BlockM-rball.png" height="50px" style="margin-top:5px;" /></div>
-			<div style="float:left; padding:6px 0 0 350px;">Grid Watch</div>
-		</div>
-	</div>
-
+{% block content %}
 	<div id="map" class="graph">
-	</div>
-
-	<div class="box_shadow info">
-		GridWatch is a system for monitoring the power grid using smartphones.
-		The idea is that if a phone transitions from charging to not charging
-		without moving that event may signal a power outage.
-		<br />
-		<span style="color:#00ff00">Green circles</span> represent power
-		transitions with movement.<br />
-		<span style="color:#ff0000">Red circles</span> represent power
-		transitions without movement which may be power outages.
-	</div>
 
 	<script>
 	// create a map in the "map" div, set the view to a given place and zoom
@@ -98,5 +115,4 @@
 
 	</script>
 
-</body>
-</html>
+{% endblock %}

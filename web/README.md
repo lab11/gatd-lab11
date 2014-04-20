@@ -29,10 +29,12 @@ Build & Debug
 
 Once you have the dependencies installed, you can build (and serve) the site
 using the `run.py` script. By default, the script will
+
 1. Update bower
 2. Build the site
 3. Start a webserver at localhost:8000
 4. Monitor the source for changes and automatically re-build (goto 2)
+
 The script accepts a few options:
 * `--no-bower`: Don't update the bower dependencies
 * `--once`: Just build the site (useful for a deploy hook, e.g. in response to a git push)

@@ -30,10 +30,6 @@ def usage():
 	print('  --no-bower  By default, bower is run when this script starts')
 	print('  --once      By default, the script monitors this directory and rebuilds'
 	      '              whenever a website source file changes.')
-	print('  --no-server By default, the script will start a webserver on port 8000'
-	      '              when the site is built. This is very useful because the actual'
-	      '              directory is replaced every time.'
-	      '              (implied by --once)')
 	print('')
 	sys.exit()
 

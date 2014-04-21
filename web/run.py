@@ -17,7 +17,7 @@ import watchdog.observers
 import watchdog.events
 
 
-parser = argparse.ArgumentParser(description='Process some integers.')
+parser = argparse.ArgumentParser()
 parser.add_argument('--no-bower',
                     action='store_true',
                     help='Do not run bower at the beginning.')
@@ -28,10 +28,6 @@ parser.add_argument('--monitor',
                     action='store_true',
                     help='Do not watch for changes')
 args = parser.parse_args()
-
-
-
-
 
 def build_site():
 	print("Building website...")
@@ -98,8 +94,15 @@ def build_site():
 
 class FileWatcher (watchdog.events.FileSystemEventHandler):
 	def on_any_event (self, event):
-		if not event.is_directory and '/built' not in event.src_path:
-			build_site();
+		if not event.is_directory and \
+		   '/built' not in event.src_path and \
+		   '/bower_components' not in event.src_path:
+			if event.src_path[-6:] == 'run.py':
+				print("#"*80)
+				print("About to exec a new instance since run.py was edited")
+				os.execl(sys.argv[0], *sys.argv)
+			else:
+				build_site();
 
 
 # First update bower

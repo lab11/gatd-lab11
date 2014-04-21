@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-import re
+import argparse
 import glob
+import http.server
 import jinja2 as jinja
 import sys
 import os
@@ -11,56 +12,34 @@ from sh import cp
 from sh import rm
 from sh import mv
 from sh import ln
+import time
+import watchdog.observers
+import watchdog.events
 
-try:
-	import pyinotify
-except ImportError:
-	print('Missing pyinotify')
-	print('\tsudo pip-python3 install pyinotify')
-	print('')
-	raise
 
-import subprocess
-import shlex
-import threading
+parser = argparse.ArgumentParser(description='Process some integers.')
+parser.add_argument('--no-bower',
+                    action='store_true',
+                    help='Do not run bower at the beginning.')
+parser.add_argument('--debug',
+                    action='store_true',
+                    help='Run a local webserver')
+parser.add_argument('--monitor',
+                    action='store_true',
+                    help='Do not watch for changes')
+args = parser.parse_args()
 
-def usage():
-	print("{0} -- Autobuild demo website".format(sys.argv[0]))
-	print('')
-	print('  --no-bower  By default, bower is run when this script starts')
-	print('  --once      By default, the script monitors this directory and rebuilds'
-	      '              whenever a website source file changes.')
-	print('')
-	sys.exit()
 
-if ('-h' in sys.argv) or ('--help' in sys.argv) or ('-?' in sys.argv):
-	usage()
 
-# First update bower
-if '--no-bower' not in sys.argv:
-	print("Updating bower...")
-	bower('install')
 
 
 def build_site():
 	print("Building website...")
-	jinja_env = jinja.Environment(loader=jinja.FileSystemLoader(['.', 'templates']))
+	je = jinja.Environment(
+		loader=jinja.FileSystemLoader(['.', 'templates']))
 
 	BUILT_DIR = 'built'
 	DIRECTORIES = ('demos', 'work-in-progress', 'raw', '.')
-	DESCRIPTIONS = {
-			'demos':"""\
-	Polished pseudo-production demos. While liable to go down at any time (this is
-	research after all!), these are projects in a more-or-less "working" state.""",
-			'work-in-progress':"""\
-	New projects we're working on building right now. Can be hit-or-miss if these will
-	be working at any given time. Don't rely on these pages if you're showing
-	something off ;)""",
-			'raw':"""\
-	An "under-the-hood" view into the raw data streams that power our demos. To
-	build queries yourself, check out the "Streams" demo above!""",
-			'.':"Uncategorized legacy pages",
-	}
 
 	try:
 		WORKING_DIR = tempfile.mkdtemp()
@@ -76,7 +55,7 @@ def build_site():
 
 				demos[directory].append(name + '.html')
 
-				output = jinja_env.get_template(filename).render()
+				output = je.get_template(filename).render()
 
 				with open(outputname, 'w') as f:
 					f.write(output)
@@ -91,15 +70,19 @@ def build_site():
 			demo_list = ''
 			for filename in sorted(demos[directory]):
 				name = os.path.splitext(filename)[0].title()
-				demo_list += jinja_env.get_template('demo_item.jinja').render(name=name, path=filename)
-			category = jinja_env.get_template('demo_category.jinja').render(
-					category=directory,
-					description=DESCRIPTIONS[directory],
-					demos=demo_list,
+				demo_list += je.get_template('demo_item.jinja').render(
+					name=name,
+					path=filename
 					)
+			category = je.get_template('demo_category_{}.jinja'
+						.format(directory)).render(
+							demos=demo_list,
+							)
 			categories.append(category)
 
-		index = jinja_env.get_template('index.jinja').render(categories=categories)
+		index = je.get_template('index.jinja').render(
+			categories=categories
+			)
 		with open(os.path.join(WORKING_DIR, 'index.html'), 'w') as f:
 			f.write(index)
 
@@ -113,105 +96,49 @@ def build_site():
 		print("")
 		raise
 
+class FileWatcher (watchdog.events.FileSystemEventHandler):
+	def on_any_event (self, event):
+		if not event.is_directory and '/built' not in event.src_path:
+			build_site();
+
+
+# First update bower
+if not args.no_bower:
+	print("Updating bower...")
+	bower('install')
+
+# Rebuild the website HTML
 build_site()
-if '--once' in sys.argv:
-	sys.exit()
 
-class AsyncCommand():
-	def __init__(self, cmd):
-		self.cmd = cmd
-		self.proc = None
+# Optionally run a file monitor to re-run build_site()
+if args.monitor:
+	print('Watching for file changes...')
+	observer = watchdog.observers.Observer()
+	observer.schedule(FileWatcher(), '.', recursive=True)
+	observer.start()
 
-	def run(self):
-		def target():
-			print("Serving website")
-			#args = shlex.split(self.cmd)
-			args = self.cmd
-			self.proc = subprocess.Popen(
-					args,
-					shell=True,
-					cwd='built/',
-					)
+# Optionally run a local web server
+if args.debug:
+	print('Running a local webserver...')
+	httpd = http.server.HTTPServer(('0.0.0.0', 8000),
+	                               http.server.SimpleHTTPRequestHandler)
 
-			print('[web] ### Worker process terminated')
+	try:
+		httpd.serve_forever()
+	except KeyboardInterrupt:
+		print('')
+		print('Keyboard Interrupt. Quitting.')
+		print('')
+		sys.exit(0)
 
-		thread = threading.Thread(target=target)
-		thread.deamon=True
-		thread.start()
-
-	def kill(self):
-		self.proc.kill()
-		self.proc.wait(timeout=1)
-
-# Based off of when-changed utility from
-# http://github.com/joh/when-changed
-class WhenChanged(pyinotify.ProcessEvent):
-	exclude = re.compile(r'^\..*\.sw[px]*$|^4913$|.~$')
-
-	def kill_server(self):
+else:
+	# If not running a webserver but yes to file watching we need to not
+	# exit
+	if args.monitor:
 		try:
-			self.ac.kill()
-		except AttributeError:
-			pass
-
-	def serve(self):
-		try:
-			self.ac.kill()
-		except AttributeError:
-			self.ac = AsyncCommand('python3 -m http.server 8000')
-
-		self.ac.run()
-
-	def is_interested(self, path):
-		basename = os.path.basename(path)
-
-		if self.exclude.match(basename):
-			return False
-		if 'built' in path:
-			return False
-		if '.git/' in path:
-			return False
-
-		if basename == 'run.py':
-			print("#"*80)
-			print("About to exec a new instance of self since run.py was edited")
-			print("  Killing child web server first")
-			self.kill_server()
-			os.execl('./run.py', 'run.py', '--no-bower')
-
-		print('Rebuilding because {0} changed'.format(path))
-		return True
-
-	def process(self, event):
-		path = event.pathname
-		if self.is_interested(path):
-			build_site()
-			self.serve()
-
-	def process_IN_CREATE(self, event):
-		return self.process(event)
-
-	def process_IN_CLOSE_WRITE(self, event):
-		return self.process(event)
-
-	def run(self):
-		wm = pyinotify.WatchManager()
-		notifier = pyinotify.Notifier(wm, self)
-
-		mask = pyinotify.IN_CLOSE_WRITE | pyinotify.IN_CREATE
-		#watched = set()
-		wm.add_watch('.', mask, rec=True, auto_add=True)
-
-		self.serve()
-		print('Monitoring for changes')
-		notifier.loop()
-
-wc = WhenChanged()
-try:
-	wc.run()
-except KeyboardInterrupt:
-	print('')
-	print('Keyboard Interrupt. Quitting.')
-	wc.kill_server()
-	print('')
-	sys.exit()
+			time.sleep(9999999)
+		except KeyboardInterrupt:
+			print('')
+			print('Keyboard Interrupt. Quitting.')
+			print('')
+			sys.exit(0)

@@ -95,19 +95,19 @@ def build_site():
 class FileWatcher (watchdog.events.PatternMatchingEventHandler):
 	def on_any_event (self, event):
 		src_path = watchdog.utils.unicode_paths.decode(event.src_path)
-		if not event.is_directory and \
-		   '/built' not in src_path and \
-		   '/bower_components' not in src_path:
-			if src_path[-6:] == 'run.py':
-				print("#"*80)
-				print("About to exec a new instance since run.py was edited")
-				try:
-					httpd.shutdown()
-				except NameError:
-					print("exec'ing via filewatcher path")
-					os.execl(sys.argv[0], *sys.argv)
-			else:
-				build_site();
+	#	if not event.is_directory and \
+	#	   '/built' not in src_path and \
+	#	   '/bower_components' not in src_path:
+		if src_path[-6:] == 'run.py':
+			print("#"*80)
+			print("About to exec a new instance since run.py was edited")
+			try:
+				httpd.shutdown()
+			except NameError:
+				print("exec'ing via filewatcher path")
+				os.execl(sys.argv[0], *sys.argv)
+		else:
+			build_site();
 
 
 # First update bower
@@ -122,7 +122,9 @@ build_site()
 if args.monitor:
 	print('Watching for file changes...')
 	observer = watchdog.observers.Observer()
-	observer.schedule(FileWatcher(patterns=['*.html', '*.jinja', '*.py']),
+	observer.schedule(FileWatcher(patterns=['*.html', '*.jinja', '*.py'],
+	                              ignore_patterns=['*/built/*',
+	                                               '*/bower_components/*']),
 	                  '.',
 	                  recursive=True)
 	observer.start()

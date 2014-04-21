@@ -1,0 +1,68 @@
+{% extends "base_intro.jinja" %}
+
+
+{% block includes %}
+<script src="js/jquery.flot.custom-0.8.2.js"></script>
+<script src="bower_components/flot/jquery.flot.time.js"></script>
+<script src="js/jquery.grapher.js"></script>
+<script src="js/gatd_graph.js"></script>
+
+<link href="css/gatd_graph.css" media="all" rel="stylesheet" type="text/css" />
+{% endblock %}
+
+{% block title %}
+Mongo Database Size
+{% endblock %}
+
+{% block page_title %}
+Mongo DB Size
+{% endblock %}
+
+{% block information %}
+<p>
+This graph shows the size of the backing MongoDB database over the last
+week.
+</p>
+{% endblock %}
+
+{% block content %}
+<div id="body">
+	<div>
+		<div id="graph" class="box_shadow graph"></div>
+	</div>
+</div>
+
+<script>
+
+var PID = 'Wr6RQjmTMH';
+var socket_cc;
+
+onload = function() {
+	socket_cc = io.connect('inductor.eecs.umich.edu:8083/stream');
+	socket_cc.on('connect', function (data) {
+		socket_cc.emit('query', {'profile_id': PID,
+		                         'time': 604800000}
+		              );
+	});
+
+	socket_cc.on('data', function (data) {
+		console.log(data['time']);
+		MIN_INTERVAL_MS=0;
+		add_to_graph(g, 0, data['time'], data['dataSize']/1073741824, '#000000',1);
+		add_to_graph(g, 1, data['time'], data['objects']/10000000, '#0000ff',1);
+	});
+
+	g = $.grapher($("#graph"),
+		{legend: {show: false, conainer: $("#graph_key")},
+		 xaxis:  {show:true, width:604800000, mode: "time", tickFormatter:x_format_days},
+		 yaxis:  {min:0, label:"DB Size (GB)"},
+		 grid:   {margin: {top: 8, bottom: 20, left: 25, right: 25}},
+		});
+
+	$("th").click(function() {
+		series = 'all';
+	});
+}
+</script>
+{% endblock %}
+

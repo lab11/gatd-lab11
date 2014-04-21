@@ -49,7 +49,8 @@ def build_site():
 				name = os.path.splitext(name)[0]
 				outputname = os.path.join(WORKING_DIR, name + '.html')
 
-				demos[directory].append(name + '.html')
+				if name != 'index':
+					demos[directory].append(name + '.html')
 
 				output = je.get_template(filename).render()
 

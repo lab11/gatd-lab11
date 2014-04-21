@@ -4,11 +4,12 @@ GRIDWATCH
 
 #}
 
-{% extends "base_intro.jinja" %}
+{% extends "base_demo_first.jinja" %}
 
 {% block includes %}
 <script src="/bower_components/leaflet/dist/leaflet.js"></script>
 <link rel="stylesheet" href="/bower_components/leaflet/dist/leaflet.css" />
+<link rel="stylesheet" href="/css/gatd_graph.css" />
 {% endblock %}
 
 {% block title %}
@@ -52,11 +53,14 @@ where GridWatch believes there may be an issue.
 		margin: 15px auto 30px auto;
 		padding: 20px;
 	}
+	#map {
+		margin-top:100px;
+	}
 	</style>
 {% endblock %}
 
 {% block content %}
-	<div id="map" class="graph">
+	<div id="map" class="graph"></div>
 
 	<script>
 	// create a map in the "map" div, set the view to a given place and zoom

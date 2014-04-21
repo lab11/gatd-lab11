@@ -101,7 +101,11 @@ class FileWatcher (watchdog.events.FileSystemEventHandler):
 			if src_path[-6:] == 'run.py':
 				print("#"*80)
 				print("About to exec a new instance since run.py was edited")
-				os.execl(sys.argv[0], *sys.argv)
+				try:
+					httpd.shutdown()
+				except NameError:
+					print("exec'ing via filewatcher path")
+					os.execl(sys.argv[0], *sys.argv)
 			else:
 				build_site();
 
@@ -129,6 +133,12 @@ if args.debug:
 
 	try:
 		httpd.serve_forever()
+		print("Destorying httpd server")
+		# I don't know why linux needs this sleep, but it does, so don't delete it
+		del httpd
+		time.sleep(1)
+		print("exec'ing via httpd path")
+		os.execl(sys.argv[0], *sys.argv)
 	except KeyboardInterrupt:
 		print('')
 		print('Keyboard Interrupt. Quitting.')

@@ -92,7 +92,7 @@ def build_site():
 		print("")
 		raise
 
-class FileWatcher (watchdog.events.FileSystemEventHandler):
+class FileWatcher (watchdog.events.PatternMatchingEventHandler):
 	def on_any_event (self, event):
 		src_path = watchdog.utils.unicode_paths.decode(event.src_path)
 		if not event.is_directory and \
@@ -122,7 +122,9 @@ build_site()
 if args.monitor:
 	print('Watching for file changes...')
 	observer = watchdog.observers.Observer()
-	observer.schedule(FileWatcher(), '.', recursive=True)
+	observer.schedule(FileWatcher(patterns=['*.html', '*.jinja', '*.py']),
+	                  '.',
+	                  recursive=True)
 	observer.start()
 
 # Optionally run a local web server

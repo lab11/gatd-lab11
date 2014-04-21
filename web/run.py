@@ -9,6 +9,7 @@ import os
 import tempfile
 from sh import bower
 from sh import cp
+from sh import find
 from sh import rm
 from sh import mv
 from sh import ln
@@ -87,6 +88,11 @@ def build_site():
 		mv(WORKING_DIR, BUILT_DIR)
 		for d in ('bower_components', 'css', 'images', 'js'):
 			ln('-s', '../'+d, BUILT_DIR)
+
+		find(BUILT_DIR, '-type', 'd', '-exec', 'chmod', '755', '{}', ';')
+		find(BUILT_DIR, '-type', 'f', '-exec', 'chmod', '644', '{}', ';')
+
+
 	except:
 		print("Unexpected error building site. Working build directory at:")
 		print("\t{0}".format(WORKING_DIR))

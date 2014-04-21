@@ -15,7 +15,7 @@ from sh import ln
 import time
 import watchdog.observers
 import watchdog.events
-
+import watchdog.utils.unicode_paths
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--no-bower',
@@ -94,10 +94,11 @@ def build_site():
 
 class FileWatcher (watchdog.events.FileSystemEventHandler):
 	def on_any_event (self, event):
+		src_path = watchdog.utils.unicode_paths.decode(event.src_path)
 		if not event.is_directory and \
-		   '/built' not in event.src_path and \
-		   '/bower_components' not in event.src_path:
-			if event.src_path[-6:] == 'run.py':
+		   '/built' not in src_path and \
+		   '/bower_components' not in src_path:
+			if src_path[-6:] == 'run.py':
 				print("#"*80)
 				print("About to exec a new instance since run.py was edited")
 				os.execl(sys.argv[0], *sys.argv)

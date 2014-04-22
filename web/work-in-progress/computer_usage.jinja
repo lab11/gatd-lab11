@@ -114,7 +114,7 @@ function hostname_is_active (name) {
 
 
 onload = function() {
-	socket = io.connect('inductor.eecs.umich.edu:8080/stream');
+	socket = io.connect('inductor.eecs.umich.edu:8082/stream');
 
 	socket.on('connect', function (data) {
 		var query = {profile_id: 'aWXe5FTVxu'};

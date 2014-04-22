@@ -24,7 +24,6 @@ class wattsup_aggregate ():
 
 		opkt = {}
 		opkt['time']             = pkt['time']
-		opkt['public']           = pkt['public']
 		opkt['profile_id']       = pkt['profile_id']
 		opkt['_processor_count'] = 0
 

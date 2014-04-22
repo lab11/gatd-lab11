@@ -30,8 +30,16 @@ The graph shows the runtime statistics of various computers.
 {% block content %}
 
 <div class="container">
-	<div id="graph_key"></div>
-	<div id="graph" style="width:1000px;height:500px;margin-left:auto;margin-right:auto;"></div>
+	<div class="well well-clear">
+		<div class="row">
+			<div class="col-lg-10 col-xs-12">
+				<div id="graph" style="width:100%;height:500px;margin-left:auto;margin-right:auto;"></div>
+			</div>
+			<div calss="col-lg-2 col-xs-12">
+				<div id="graph_key"></div>
+			</div>
+		</div>
+	</div>
 
 	<div class="well">
 		<h3>Machines reporting usage data:</h3>
@@ -149,7 +157,7 @@ onload = function() {
 	});
 
 
-	g = $.grapher($("#graph"), {graph_key: $("#graph_key")});
+	g = $.grapher($("#graph"), {legend: {show: true, container: $("#graph_key")}});
 
 
 

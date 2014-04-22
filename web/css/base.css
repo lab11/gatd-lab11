@@ -7,3 +7,8 @@ body {
 	font-weight: bold;
 	color: #0892D0;
 }
+
+.well-clear {
+	background-image: none;
+	background-color: transparent;
+}

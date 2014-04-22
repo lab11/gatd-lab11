@@ -29,12 +29,17 @@ The graph shows the runtime statistics of various computers.
 
 {% block content %}
 
-<div id="graph" style="width:1000px;height:500px;float:left"></div>
-<div id="graph_key"></div>
+<div class="container">
+	<div id="graph_key"></div>
+	<div id="graph" style="width:1000px;height:500px;margin-left:auto;margin-right:auto;"></div>
 
-<div id="hostname_select" style="float:right">
-	<ul style="list-style-type:none;">
-	</ul>
+	<div class="well">
+		<h3>Machines reporting usage data:</h3>
+		<div id="hostname_select">
+			<ul style="list-style-type:none;">
+			</ul>
+		</div>
+	</div>
 </div>
 
 <script type="text/javascript">
@@ -80,7 +85,7 @@ function add_checkbox(name) {
 function update_active_hostnames () {
 	active_hostnames.splice(0, active_hostnames.length);
 	$("#hostname_select input[type='checkbox']").each(function () {
-		if ($(this).attr('checked') == 'checked') {
+		if ($(this).prop('checked')) {
 			active_hostnames.push($(this).attr('value'));
 		} else {
 			g.removeSeries($(this).attr('value'));

@@ -72,6 +72,9 @@ def build_site():
 					name=name,
 					path=filename
 					)
+			if demo_list == '':
+				# No demos in this category, skip it
+				continue
 			category = je.get_template('demo_category_{}.jinja'
 						.format(directory)).render(
 							demos=demo_list,

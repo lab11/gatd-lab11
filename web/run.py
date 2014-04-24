@@ -67,7 +67,7 @@ def build_site():
 		for directory in DIRECTORIES:
 			demo_list = ''
 			for filename in sorted(demos[directory]):
-				name = os.path.splitext(filename)[0].title()
+				name = os.path.splitext(filename)[0].title().replace('_', ' ')
 				demo_list += je.get_template('demo_item.jinja').render(
 					name=name,
 					path=filename

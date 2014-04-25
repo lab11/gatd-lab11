@@ -232,7 +232,7 @@ treeJSON = d3.json("http://inductor.eecs.umich.edu:8085/explore/all", function(e
         scale = zoomListener.scale();
         x = -source.y0;
         y = -source.x0;
-        x = x * scale + viewerWidth / 2;
+        x = (x * scale + viewerWidth / 2) / 1.5;
         y = y * scale + viewerHeight / 2;
         d3.select('g').transition()
             .duration(duration)

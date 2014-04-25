@@ -18,6 +18,17 @@ import watchdog.observers
 import watchdog.events
 import watchdog.utils.unicode_paths
 
+try:
+	import titlecase
+except ImportError:
+	print('Missing titlecase package.')
+	print('You need to:')
+	print('\tsudo python3-pip install ez_setup')
+	print('\tsudo python3-pip install titlecase')
+	print("(Package doesn't list dependencies correctly but is hosted on")
+	print(" launchpad and I'm not fixing that...")
+	raise
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--no-bower',
                     action='store_true',
@@ -67,7 +78,8 @@ def build_site():
 		for directory in DIRECTORIES:
 			demo_list = ''
 			for filename in sorted(demos[directory]):
-				name = os.path.splitext(filename)[0].title().replace('_', ' ')
+				name = os.path.splitext(filename)[0].replace('_', ' ')
+				name = titlecase.titlecase(name)
 				demo_list += je.get_template('demo_item.jinja').render(
 					name=name,
 					path=filename

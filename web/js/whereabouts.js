@@ -49,7 +49,7 @@ function record_presence (person_list, loc, time) {
 
     // If no one was found, display a message
     if (person_list.length == 0) {
-        var empty_text = $('<div><h3>No one found</h3></div>');
+        var empty_text = $("<div><h3>There doesn't appear to be anyone here right now</h3></div>");
         $("#people_row").append(empty_text);
         return;
     }

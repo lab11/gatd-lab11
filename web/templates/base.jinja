@@ -2,6 +2,7 @@
 <head>
 	{% block header %}
 
+	<link rel="shortcut icon" type="image/x-icon" href="/images/favicon.ico" />
 	<script src="/bower_components/socket.io-client/dist/socket.io.min.js"></script>
 	<script src="/bower_components/jquery/dist/jquery.min.js"></script>
 	<script src="/bower_components/underscore/underscore.js"></script>
@@ -28,11 +29,15 @@
 				{% block page_title %}{% endblock %}
 			</div>
 			<div class="navbar-right hidden-xs" style="margin:8px 0 0 20px;">
-				<img src="/images/michigan.png" height="35px" />
+				<a href="http://www.eecs.umich.edu/cse/">
+					<img src="/images/michigan.png" height="35px" />
+				</a>
 			</div>
-			<ul class="nav navbar-nav navbar-right">
-				<li><a href="http://lab11.eecs.umich.edu">Lab11</a>
-			</ul>
+			<div class="nav navbar-nav navbar-right" style="margin:8px 0 0 20px;">
+				<a href="http://lab11.eecs.umich.edu">
+					<img src="/images/lab11_50px.jpg" height="35px" />
+				</a>
+			</div>
 		</div>
 	</div>
 

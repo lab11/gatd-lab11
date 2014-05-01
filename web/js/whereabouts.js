@@ -85,7 +85,9 @@ function record_presence (person_list, loc, time) {
             }
         }
 
-        if (!present) {
+        // Don't remove people unless the data coming from their last known
+        //  location says that they are gone
+        if (!present && presence_map[present_uniqname][0] == loc) {
             if (presence_map[uniqname][0] == loc) {
                 // Person no longer presesnt
                 presence_map[present_uniqname][0] = "";

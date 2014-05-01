@@ -45,14 +45,8 @@ function display_person (uniqname) {
 }
 
 function record_presence (person_list, loc, time) {
+    // Clear the page
     $("#people_row").empty();
-
-    // If no one was found, display a message
-    if (person_list.length == 0) {
-        var empty_text = $("<div><h3>There doesn't appear to be anyone here right now</h3></div>");
-        $("#people_row").append(empty_text);
-        return;
-    }
 
     // Check if new people need to be added to the map
     for (var i=0; i<person_list.length; i++) {
@@ -67,6 +61,7 @@ function record_presence (person_list, loc, time) {
 
     // Iterate through map, updating and displaying
     //console.log("Presence Map Updated:");
+    var anyone_here = false;
     var present_uniqnames = Object.keys(presence_map).sort();
     for (var i=0; i<present_uniqnames.length; i++) {
         var present_uniqname = present_uniqnames[i];
@@ -82,24 +77,32 @@ function record_presence (person_list, loc, time) {
                 presence_map[present_uniqname][0] = loc;
                 presence_map[present_uniqname][1] = time;
                 display_person(present_uniqname);
+                anyone_here = true;
             }
         }
 
-        // Don't remove people unless the data coming from their last known
-        //  location says that they are gone
-        if (!present && presence_map[present_uniqname][0] == loc) {
-            if (presence_map[uniqname][0] == loc) {
+        if (!present) {
+            if (presence_map[present_uniqname][0] == loc) {
                 // Person no longer presesnt
                 presence_map[present_uniqname][0] = "";
                 presence_map[present_uniqname][1] = time;
             } else if (presence_map[present_uniqname][0] != "") {
                 // Person still present somewhere else
                 display_person(present_uniqname);
+                anyone_here = true;
             }
         }
 
         //console.log("presence_map[" + present_uniqname + "]:");
         //console.log(presence_map[present_uniqname].toString());
     }
+
+    // If no one was found, display a message
+    if (!anyone_here) {
+        var empty_text = $("<div><h3>There doesn't appear to be anyone here right now</h3></div>");
+        $("#people_row").append(empty_text);
+        return;
+    }
+
 }
 

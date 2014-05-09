@@ -25,15 +25,36 @@
 	<div class="navbar navbar-default navbar-fixed-top" role="navigation">
 		<div class="container">
 			<div class="navbar-header page-title">
-				<a href="/index.html">Demos</a> | 
-				{% block page_title %}{% endblock %}
+				<div class="hidden-xs">
+					<a href="/index.html">Demos</a> | 
+					{% block page_title %}{% endblock %}
+				</div>
+				<div class="visible-xs">
+					<div class="row">
+						<div class="col-xs-2">
+							<a href="http://www.eecs.umich.edu/cse/">
+								<img src="/images/michigan.png" height="35px" style="margin:4px 0 0 10px;"/>
+							</a>
+						</div>
+						<div class="col-xs-8">
+							<div class="text-center">
+								<a href="/index.html">Demos Home</a>
+							</div>
+						</div>
+						<div class="col-xs-2">
+							<a href="http://lab11.eecs.umich.edu">
+								<img src="/images/lab11_50px.jpg" height="35px" style="margin:4px 10px 0px 0;"/>
+							</a>
+						</div>
+					</div>
+				</div>
 			</div>
 			<div class="navbar-right hidden-xs" style="margin:8px 0 0 20px;">
 				<a href="http://www.eecs.umich.edu/cse/">
 					<img src="/images/michigan.png" height="35px" />
 				</a>
 			</div>
-			<div class="nav navbar-nav navbar-right" style="margin:8px 0 0 20px;">
+			<div class="nav navbar-nav navbar-right hidden-xs" style="margin:8px 0 0 20px;">
 				<a href="http://lab11.eecs.umich.edu">
 					<img src="/images/lab11_50px.jpg" height="35px" />
 				</a>

@@ -4,12 +4,22 @@ function display_person (uniqname) {
     // Get location string
     var loc = presence_map[uniqname][0];
     loc = loc.replace(/[\|]+/g, ", ").replace("|", ", ");
-    
+
+    // Get since string
+    var since = new Date(presence_map[uniqname][3]*1000);
+    var hours = since.getHours();
+    var minutes = since.getMinutes();
+    var suffex = (hours >= 12)? 'PM' : 'AM';
+    hours = (hours > 12)? hours-12 : hours;
+    hours = (hours == '00')? 12 : hours;
+    minutes = (minutes < 10)? '0'+minutes : minutes;
+    since = hours.toString() + ":" + minutes.toString() + " " + suffex;
+
     // Get time string
     var time = new Date(presence_map[uniqname][1]);
-    var hours = time.getHours();
-    var minutes = time.getMinutes();
-    var suffex = (hours >= 12)? 'PM' : 'AM';
+    hours = time.getHours();
+    minutes = time.getMinutes();
+    suffex = (hours >= 12)? 'PM' : 'AM';
     hours = (hours > 12)? hours-12 : hours;
     hours = (hours == '00')? 12 : hours;
     minutes = (minutes < 10)? '0'+minutes : minutes;
@@ -23,6 +33,7 @@ function display_person (uniqname) {
         $('<div class="col-lg-2" id="' + uniqname +'">' +
           '<h3>' + full_name + '</h3>' +
           '<p>' + loc + '</p>' +
+          '<p> Since: ' + since + '</p>' +
           '<p> Updated: ' + time + '</p>' +
           '</div>');
 
@@ -44,7 +55,7 @@ function display_person (uniqname) {
     $('#' + uniqname).prepend(img);
 }
 
-function record_presence (person_list, loc, time) {
+function record_presence (person_list, loc, time, since_list) {
     // Clear the page
     $("#people_row").empty();
 
@@ -53,9 +64,10 @@ function record_presence (person_list, loc, time) {
         var person = person_list[i];
         var uniqname = Object.keys(person_list[i])[0];
         var full_name = person_list[i][uniqname];
+        var since = since_list[i][uniqname];
 
         if (!(uniqname in presence_map)) {
-            presence_map[uniqname] = [loc, time, full_name];
+            presence_map[uniqname] = [loc, time, full_name, since];
         }
     }
 
@@ -70,12 +82,15 @@ function record_presence (person_list, loc, time) {
         for (var j=0; j<person_list.length; j++) {
             var uniqname = Object.keys(person_list[j])[0];
             var full_name = person_list[j][uniqname];
+            var since = since_list[j][uniqname];
             
             if (uniqname == present_uniqname) {
                 // Person is present, update entry and display
                 present = true;
                 presence_map[present_uniqname][0] = loc;
                 presence_map[present_uniqname][1] = time;
+                presence_map[present_uniqname][2] = full_name;
+                presence_map[present_uniqname][3] = since;
                 display_person(present_uniqname);
                 anyone_here = true;
             }
@@ -86,6 +101,7 @@ function record_presence (person_list, loc, time) {
                 // Person no longer presesnt
                 presence_map[present_uniqname][0] = "";
                 presence_map[present_uniqname][1] = time;
+                presence_map[present_uniqname][3] = 0;
             } else if (presence_map[present_uniqname][0] != "") {
                 // Person still present somewhere else
                 display_person(present_uniqname);

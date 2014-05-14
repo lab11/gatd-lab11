@@ -49,7 +49,7 @@ onload = function() {
   socket_cc.on('data', function (data) {
       //console.log(data['person_list'].toString() + " " +
       //        data['time'] + " " + data['location_str']);
-      record_presence(data['person_list'], data['location_str'], data['time']);
+      record_presence(data['person_list'], data['location_str'], data['time'], data['since_list']);
       });
 }
 </script>

@@ -22,7 +22,7 @@ class duttectionParser ():
 
 		values = struct.unpack('!10s H H H H B', data[0:19])
 
-		ret['profile_id']  = values[0]
+		# ret['profile_id']  = values[0]
 		ret['sequence']    = values[1]
 		ret['temperature'] = values[2]
 		ret['humidity']    = values[3]

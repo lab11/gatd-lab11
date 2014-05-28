@@ -11,7 +11,7 @@ class duttectionParser (parser.parser):
 
 	name = 'Hemera Sensor Data'
 	description = 'Light, humidity, temperature, & motion in Prabal\'s office.'
-	no_parse = True
+	no_parse = False
 
 	def __init__ (self):
 		pass

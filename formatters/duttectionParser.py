@@ -11,6 +11,7 @@ class duttectionParser (parser.parser):
 
 	name = 'Hemera Sensor Data'
 	description = 'Light, humidity, temperature, & motion in Prabal\'s office.'
+	no_parse = True
 
 	def __init__ (self):
 		pass
@@ -20,7 +21,7 @@ class duttectionParser (parser.parser):
 
 		values = struct.unpack('!10s H H H H 8B', data)
 
-		gatd_profile_id    = values[0]
+		ret['profile_id']  = values[0]
 		ret['sequence']    = values[1]
 		ret['temperature'] = values[2]
 		ret['humidity']    = values[3]

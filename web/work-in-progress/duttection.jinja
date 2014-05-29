@@ -11,22 +11,18 @@ DUTTECTION
     * {transition:1s;}
     body {font-size:20pt; font-weight:100;}
     span  {color: rgba(30,30,30,.6); font-weight:100; display:inline-block;}
-    #status {background: rgb(0,127,255); color:rgba(230,230,230,.8); text-align:center; width:300px; height:300px; border-radius:200px; padding:50px 0px; margin-top:20px;}
-    #graph1 {font-size:12pt; font-weight: 200;}
+    #status {background: rgb(0,127,255); color:rgba(230,230,230,.8); text-align:center; width:300px; height:300px; border-radius:50%; padding:50px 0; margin:10px auto;}
+    #graph1 {font-size:10pt; font-weight: 200;}
     .Some {-webkit-animation: move .5s; animation: move .5s;}
-    @-webkit-keyframes move {25%{margin-left:-50px;} 50%{margin-left:60px;} 75%{margin-left:-10px;} 100%{margin-left:0px;}}
-    @keyframes move {25%{margin-left:-50px;} 50%{margin-left:60px;} 75%{margin-left:-20px;} 100%{margin-left:0px;}}
+    @-webkit-keyframes move {25%{-webkit-transform:translate(-50px)} 50%{-webkit-transform:translate(60px)} 75%{-webkit-transform:translate(-10px)} 100%{-webkit-transform:translate(0px)}}
+    @keyframes move {25%{transform:translate(-50px)} 50%{transform:translate(60px)} 75%{transform:translate(-20px)} 100%{transform:translate(0px)}}
 </style>
-
-
 <script src="js/jquery.flot.custom-0.8.2.js"></script>
+<script src="js/jquery.flot.resize.js"></script>
 <script src="bower_components/flot/jquery.flot.time.js"></script>
 <script src="js/jquery.grapher.js"></script>
 <script src="js/gatd_graph.js"></script>
-
 <link href="css/gatd_graph.css" media="all" rel="stylesheet" type="text/css" />
-
-
 {% endblock %}
 
 {% block title %}
@@ -43,90 +39,74 @@ Hemera-Based Indoor Monitoring
 
 {% block content %}
 
-
 <div id="container" style="margin-top:5px;">
     <div class='row'>
-    <div class="col-lg-2 col-xs-12"></div>
-        <div class="col-lg-6 col-xs-12" id='graph1' style='height:400px;'></div>
-        <div class="col-lg-4 col-xs-12">
+        <div class="col-xl-8 col-md-7 col-sm-6 col-xs-12 col-sm-offset-1" id='graph1' style='height:400px;'></div>
+        <div class="col-xl-2 com-md-3 col-sm-3 col-xs-12">
             <div id='status' class='None'>
                 <span style='color:inherit;'>HEMERA SENSE</span><br />
                 <span style='font-weight:300; font-size:12pt; margin-bottom:10px;'>(Sampling Every 3 Seconds)</span><br />
-                Temperature <span id="n0">0</span><span>&deg;F</span><br />
-                Humidity    <span id="n1">0</span><span>%</span><br />
-                Light       <span id="n2">0</span><span>Lx</span><br />
-                Motion      <span id="n3">None</span><br />
-                <br /><span>Last Duttection:</span><span id='time'></span>
+                Temperature <span id="Temperature (F)">0</span><span>&deg;F</span><br />
+                Humidity    <span id="Humidity (%)">0</span><span>%</span><br />
+                Light       <span id="Light (Lx)">0</span><span>Lx</span><br />
+                Motion      <span id="Motion">None</span><br />
             </div>
+            <div style='text-align:center; width:300px; margin:0 auto'><span>Last Duttection:</span><br /><span id='time'></span></div>
         </div>
-        <div class="col-lg-2 col-xs-12">
+        <div class="col-sm-1 col-xs-0">
     </div>
 </div>
-
 
 <script>
 var PID = 'TtYWhXKRke';
 var socket;
-var tmp=0, hum=0, lux=0, mtn=0, tim=(new Date()).getTime() - 5*60*1000;
-
+var pre = 5; // time range (in minutes) to display on graph
+var mtn = 0; // initialize to no motion detected
+var convert = function (data) {
+    var tmp = data['temperature'] * .018 - 40;
+    var hum = -2.0468 + data['humidity'] * .0367 + Math.pow(data['humidity'],2) * -1.5955e-6;
+    var lux = data['light'] * .8;
+    var tim = data['time'];
+    add_to_graph(g1,'',0,0,0,0);
+    pdw={};pd={};pd['Motion']=[tim,mtn*101-1];pdw={name:'',data:pd,lines:{fill:true,lineWidth:0}}; g1.addData(pdw); g1.update(series);
+    pdw={};pd={};pd['Motion']=[tim,data['motion']*102-1];pdw={name:'',data:pd,lines:{fill:true,lineWidth:0}}; g1.addData(pdw); g1.update(series);
+    add_to_graph(g1, 'Temperature (F)', tim, tmp, get_color(8), 0);
+    add_to_graph(g1, 'Humidity (%)'   , tim, hum, get_color(10), 0);
+    add_to_graph(g1, 'Light (Lx)'     , tim, lux, get_color(12), 0);
+    mtn = data['motion'];
+    change ( "Temperature (F)", Math.round(tmp) );
+    change ( "Humidity (%)", Math.round((hum > 100) ? 100 : hum) );
+    change ( "Light (Lx)", Math.round(lux) );
+    document.querySelector("#Motion").innerHTML = mtn ? "Some" : "None";
+    document.querySelector('#status').style.background = "rgb(" + Math.round(2.8 * tmp) + "," + 127 + "," + Math.round(255 - tmp * 2.8) + ")"; 
+    document.querySelector('#status').className = document.querySelector("#Motion").innerHTML;
+    if (mtn) document.querySelector('#time').innerHTML = (new Date(tim)).toLocaleTimeString();
+}
+var change = function (nid,next,timeval) {
+    var current  = document.getElementById(nid).innerHTML;
+    var delta    = (current-next)/50;
+    var i        = 0;
+    var dig = function () {
+        current  -= delta;
+        document.getElementById(nid).innerHTML=Math.round(current);
+        if(i++<50) setTimeout(function () {dig()},10);
+    };
+    if (isNaN(parseInt(current))) document.querySelector(nid).innerHTML=next;
+    else if (current!=next) dig();
+}
 onload = function() {
     socket = io.connect('inductor.eecs.umich.edu:8082/stream');
-    socket.on('connect', function (data) { socket.emit('query', { 'profile_id': PID, 'time': 5*60*1000 }); });
+    socket.on('connect', function (data) { socket.emit('query', { 'profile_id': PID, 'time': pre*60*1000 }); });
     socket.on('data',    function (data) { convert(data); });
-
     g1 = $.grapher( $("#graph1") , {
             legend: {show: true, position:"nw"},
-            xaxis:  {show:true, width:300000, mode: "time", tickFormatter:x_format},
+            xaxis:  {show:true, width:pre*60*1000, mode: "time", tickFormatter:x_format},
             yaxis:  {max:100, min:0}, 
-            grid:   {margin: {top: 8, bottom: 20, left: 25, right: 25}},
+            grid:   {margin: {top: 8, bottom: 20, left: 20, right: 20}, borderWidth:1, borderColor:'#999'},
         });
     g1.__uniqueid = 1;
-
-    for(i=0;i<50;i++) get_color(i);
-
+    for(i=0;i<20;i++) get_color(i);
 }
-
-convert = function (data) {
-    tmp = Math.round(data['temperature'] * .018 - 40);
-    hum = Math.round(-2.0468 + data['humidity'] * .0367 + Math.pow(data['humidity'],2) * -1.5955e-6);
-    lux = Math.round(data['light'] * .8);
-    mtn = data['motion'];
-    change ( "#n0", tmp );
-    change ( "#n1", (hum > 100) ? 100 : hum );
-    change ( "#n2", lux);
-    document.querySelector("#n3").innerHTML = mtn ? "Some" : "None";
-    document.querySelector('#status').style.background = "rgb(" + Math.round(2.8 * tmp) + "," + 127 + "," + Math.round(255 - tmp * 2.8) + ")"; 
-    document.querySelector('#status').className = document.querySelector("#n3").innerHTML;
-    document.querySelector('#status').class = document.querySelector("#n3").innerHTML;
-    if (mtn) document.querySelector('#time').innerHTML = (new Date(data['time'])).toLocaleTimeString();
-    for (i=0; i<3000; i+=250) {
-        add_to_graph(g1, 'Motion',tim- -i, -1, 'hsl(0,0%,80%)', 0);
-        add_to_graph(g1, 'Motion',tim- -i, mtn*101 - 1, 'hsl(0,0%,80%)', 0);
-    }
-    tim = data['time'];
-    add_to_graph(g1, 'Temperature (F)', tim, tmp, get_color(10), 0);
-    add_to_graph(g1, 'Humidity (%)'   , tim, hum, get_color(11), 0);
-    add_to_graph(g1, 'Light (Lx)'     , tim, lux, get_color(12), 0);
-    // setInterval(function() {
-    //     var x = (new Date()).getTime();
-    //     add_to_graph(g1, 'Motion'         , x, -1, 'hsl(0,0%,80%)', 0);
-    //     add_to_graph(g1, 'Motion'         , x, mtn*101 - 1, get_color(18), 0);
-    // }, 250); 
-}
-    var change = function (nid,next) {
-        var current = document.querySelector(nid).innerHTML;
-        var delta   = (current-next)/50;
-        var i = 0;
-        var dig = function () {
-            current-=delta;
-            document.querySelector(nid).innerHTML=Math.round(current);
-            if(i++<50) setTimeout(function () {dig()},10);
-        };
-        if (isNaN(parseInt(current))) document.querySelector(nid).innerHTML=next;
-        else if (current!=next) dig();
-    }
 </script>
-
-
 
 {% endblock %}

@@ -1,0 +1,95 @@
+{% extends "base_intro.jinja" %}
+
+
+{% block includes %}
+<script src="js/jquery.flot.custom-0.8.2.js"></script>
+<script src="bower_components/flot/jquery.flot.time.js"></script>
+<script src="js/jquery.grapher.js"></script>
+<script src="js/gatd_graph.js"></script>
+
+<link href="css/gatd_graph.css" media="all" rel="stylesheet" type="text/css" />
+{% endblock %}
+
+{% block title %}
+Berkeley DOP Power
+{% endblock %}
+
+{% block page_title %}
+Donald O. Pederson Center
+{% endblock %}
+
+{% block tagline %}
+Real-Time Power Monitoring
+{% endblock %}
+
+{% block information %}
+<p>
+Real-time power draw at the DOP Center in Cory Hall at the University of California, Berkeley.
+</p>
+{% endblock %}
+
+{% block content %}
+
+<div id="body">
+	<div>
+		<div id="graph2" class="box_shadow graph graph_short graph2"></div>
+	</div>
+	<div id="key" class="box_shadow key">
+		<table id="key_table">
+			<thead><tr>
+					<th style="width:10%;">Index</th>
+					<th style="width:20%;">ID</th>
+					<th style="width:30%;">Description</th>
+					<th style="width:30%;">Location</th>
+					<th style="width:10%;">Last Frequency</th>
+			</tr></thead>
+			<tbody id="key_table_tbody"></tbody>
+		</table>
+	</div>
+</div>
+
+<script>
+
+var CC_PID = '7aiOPJapXF';
+var socket;
+var location_regex = '^USA\\|California\\|Berkeley\\|DOP Center.*';
+//var location_regex = '^USA\\|Michigan\\|Ann Arbor\\|1885 Fuller.*';
+
+onload = function() {
+	socket = io.connect('inductor.eecs.umich.edu:8082/stream');
+	socket.on('connect', function (data) {
+		socket.emit('query', {'$and':[{'profile_id':CC_PID}, {'_processor_freq':'last'}],
+		                      'description': {'$exists': true},
+		                      'location_str': {'$regex': location_regex, '$options': 'i'},
+		                      'time': 300000}
+		           );
+	});
+
+	socket.on('data', function (data) {
+		if ('ccid_mac' in data) {
+			var color = get_color(data['ccid_mac']);
+		} else {
+			var color = get_color(data['description']);
+		}
+		if (data['profile_id'] == CC_PID) {
+			add_to_key(undefined,
+				data['ccid_mac'],
+				data['description'],
+				data['location_str'],
+				data['freq'],
+				color);
+			fixup_index();
+			add_to_graph(g2, data['ccid_mac'], data['time'], data['freq'], color);
+		}
+	});
+
+	g2 = $.grapher($("#graph2"),
+		{legend: {show: false},
+		 xaxis:  {show:true, width:300000, mode: "time", tickFormatter:x_format},
+		 yaxis:  {min:0, label:"Frequency (Activations/Second)", max:4},
+		 grid:   {margin: {top: 8, bottom: 20, left: 25, right: 25}},
+		});
+}
+</script>
+
+{% endblock %}

@@ -67,6 +67,8 @@ onload = function() {
 	});
 
 	socket_cc.on('data', function (data) {
+		if (data['description'].match(/Circuit/g)) return;
+
 		var color = get_color(data['ccid_mac'])
 		add_to_key(g,
 			data['ccid_mac'],

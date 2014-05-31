@@ -32,7 +32,7 @@ Real-time power draw at the DOP Center in Cory Hall at the University of Califor
 
 <div id="body">
 	<div>
-		<div id="graph2" class="box_shadow graph graph_short graph2"></div>
+		<div id="graph2" class="box_shadow graph graph2"></div>
 	</div>
 	<div id="key" class="box_shadow key">
 		<table id="key_table">
@@ -86,7 +86,7 @@ onload = function() {
 	g2 = $.grapher($("#graph2"),
 		{legend: {show: false},
 		 xaxis:  {show:true, width:300000, mode: "time", tickFormatter:x_format},
-		 yaxis:  {min:0, label:"Frequency (Activations/Second)", max:4},
+		 yaxis:  {min:0, label:"Frequency (Activations/Second)", max:6},
 		 grid:   {margin: {top: 8, bottom: 20, left: 25, right: 25}},
 		});
 }

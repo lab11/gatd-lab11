@@ -3,6 +3,8 @@ GATD Web Pages
 
 These webpages display data from GATD.
 
+View the demos live at http://inductor.eecs.umich.edu/
+
 Install
 -------
 

@@ -1,6 +1,6 @@
 import parser
 
-class fitbitLocatorParser (parser.parser):
+class macAddrParser (parser.parser):
 
 	name = 'MAC Address Parser'
 	description = 'Scans of MAC Addresses of all wi-fi devices in a location.'

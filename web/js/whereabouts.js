@@ -14,6 +14,7 @@ function display_person (uniqname) {
     hours = (hours == '00')? 12 : hours;
     minutes = (minutes < 10)? '0'+minutes : minutes;
     since = hours.toString() + ":" + minutes.toString() + " " + suffex;
+    since = "Since: " + since;
 
     // Get time string
     var time = new Date(presence_map[uniqname][1]);
@@ -24,6 +25,7 @@ function display_person (uniqname) {
     hours = (hours == '00')? 12 : hours;
     minutes = (minutes < 10)? '0'+minutes : minutes;
     time = hours.toString() + ":" + minutes.toString() + " " + suffex;
+    time = "Updated: " + time;
 
     // Get full name
     var full_name = presence_map[uniqname][2];

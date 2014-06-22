@@ -14,17 +14,13 @@ dependencies and to get them simply:
 
     bower install
 
-Currently, leaflet doesn't quite work right, so you need to build that one
-yourself.
-
-    cd bower_components/leaflet
-    npm install
-    sudo npm install -g jake
-    jake
-
 If the webpages can't find javascript files, it's likely that something in
 bower-land is broken. My suggestion? Removed the `bower_components` folder
 and re-run `bower install`.
+
+The `run.py` script needs some python packages:
+
+    pip3 install -r requirements.pip
 
 Build & Debug
 -------------
@@ -39,4 +35,5 @@ using the `run.py` script. By default, the script will
 
 The script accepts a few options:
 * `--no-bower`: Don't update the bower dependencies
-* `--once`: Just build the site (useful for a deploy hook, e.g. in response to a git push)
+* `--debug`: Run a local webserver
+* `--monitor`: Track filesystem changes and re-build the website

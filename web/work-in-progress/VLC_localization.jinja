@@ -246,7 +246,7 @@ VLC Location
 		//console.log('x_rot ' + x_rot + ' y_rot ' + y_rot);
 		//context.lineTo(x-x_rot, y+y_rot)
 		var x_rot = rot[0][0] * 30;
-		var y_rot = rot[0][1] * 30;
+		var y_rot = -rot[0][1] * 30;
 		draw_arrow(context, [x,y], [x+x_rot, y+y_rot]);
 	}
 

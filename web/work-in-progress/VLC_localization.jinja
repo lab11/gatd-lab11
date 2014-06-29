@@ -63,7 +63,7 @@ VLC Location
 	var socket_loc;
 
 	var WIDTH    = 1600;
-	var HEIGHT   = 600;
+	var HEIGHT   = 1600;
 	var PX_SCALE = 10;
 
 	var grid_canvas = document.getElementById('grid_canvas');
@@ -82,7 +82,7 @@ VLC Location
 	}
 
 	function ty(y) {
-		return HEIGHT/2 - y;
+		return y + 300;
 	}
 
 	function t(pt) {
@@ -138,10 +138,10 @@ VLC Location
 		context.font = orig_font;
 
 		// Draw Door
-		var hinge = [200+220+320, 200+30]
+		var hinge = [200+220+320, -200-30]
 		context.strokeStyle = '#000';
 		context.lineWidth = 2;
-		draw_line(context, t(hinge), t([hinge[0], hinge[1]-320]));
+		draw_line(context, t(hinge), t([hinge[0], hinge[1]+320]));
 		context.lineWidth = 1;
 		context.strokeStyle = '#666';
 		context.beginPath();
@@ -151,9 +151,12 @@ VLC Location
 		// Draw Wall
 		context.strokeStyle = '#000';
 		context.lineWidth = 3;
-		draw_line(context, t([-WIDTH/2, 200+30]), t([hinge[0]-320, 200+30]));
-		draw_line(context, t([hinge[0], 200+30]), t([WIDTH/2, 200+30]));
+		draw_line(context, t([-WIDTH/2, -200-30]), t([hinge[0]-320, -200-30]));
+		draw_line(context, t([hinge[0], -200-30]), t([WIDTH/2, -200-30]));
 		context.lineWidth = 1;
+
+		//draw_line(context, [0, 0], [100, 200]);
+		//draw_line(context, t([0, 0]), t([100, 200]));
 
 		// Draw Transmitter Box
 		function draw_square(context, center, radius) {

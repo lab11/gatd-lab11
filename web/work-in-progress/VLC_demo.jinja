@@ -1,0 +1,239 @@
+{#
+
+LOC_VLC_SIMPLE
+
+#}
+
+{% extends "base.jinja" %}
+
+{% block includes %}
+<script src="/js/gatd_canvas.js"></script>
+{% endblock %}
+
+{% block title %}
+VLC Location - Simple Grid
+{% endblock %}
+
+{% block page_title %}
+VLC Location
+{% endblock %}
+
+{% block body %}
+	<div id="body">
+		<div>
+			<canvas id="grid_canvas_yz" width="720" height="720"
+				style="z-index: 1; position:absolute; top:70px; right: 0; left: 0; margin-right: auto; margin-left: auto;"></canvas>
+			<canvas id="dots_canvas_yz" width="720" height="720"
+				style="z-index: 2; position:absolute; top:70px; right: 0; left: 0; margin-right: auto; margin-left: auto;"></canvas>
+			<canvas id="grid_canvas_xy" width="720" height="720"
+				style="z-index: 1; position:absolute; top:70px; right: 0; left: 450; margin-right: auto; margin-left: auto;"></canvas>
+			<canvas id="dots_canvas_xy" width="720" height="720"
+				style="z-index: 2; position:absolute; top:70px; right: 0; left: 450; margin-right: auto; margin-left: auto;"></canvas>
+		</div>
+		<!--
+		<div id="key" class="box_shadow key">
+			<table id="key_table">
+				<thead><tr>
+						<th>Index</th>
+						<th>ID</th>
+						<th>Description</th>
+						<th>Location</th>
+						<th>Time</th>
+				</tr></thead>
+				<tbody id="key_table_tbody"></tbody>
+			</table>
+		</div>
+		-->
+	</div>
+
+	<script>
+	var LOC_VLC_PID = 'WEgwAGyc9N';
+	var socket_loc;
+
+	var PX_SCALE = 10;
+	var WIDTH    = 72 * PX_SCALE;
+	var HEIGHT   = 72 * PX_SCALE;
+
+	var grid_canvas_xy = document.getElementById('grid_canvas_xy');
+	var dots_canvas_xy = document.getElementById('dots_canvas_xy');
+	console.log(grid_canvas_xy)
+	console.log(dots_canvas_xy)
+
+	grid_canvas_xy.width  = WIDTH
+	dots_canvas_xy.width  = WIDTH
+	grid_canvas_xy.height = HEIGHT
+	dots_canvas_xy.height = HEIGHT
+
+	var loc_hist = Array();
+	var age_out = 15000; //1000 * 60 * 5;
+
+	function tx(x) {
+		return x + WIDTH / 2;
+	}
+
+	function ty(y) {
+		return y + HEIGHT / 2;
+	}
+
+	function t(pt) {
+		return [tx(pt[0]), ty(pt[1])];
+	}
+
+	function draw_background() {
+		var grid_canvas_xy = document.getElementById('grid_canvas_xy');
+		var context = grid_canvas_xy.getContext('2d');
+
+		// Start with a blank slate
+		context.clearRect(0, 0, WIDTH, HEIGHT);
+
+		// Draw 1" grid
+		context.strokeStyle = '#ccc';
+		//context.setLineDash([2,3]);
+		for (r in _.range(WIDTH/PX_SCALE + 1)) {
+			i = r*PX_SCALE;
+			context.beginPath();
+			context.moveTo(0, i);
+			context.lineTo(WIDTH, i);
+			context.stroke();
+
+			context.beginPath();
+			context.moveTo(i, 0);
+			context.lineTo(i, WIDTH);
+			context.stroke();
+		}
+
+		// Draw 1' grid (masking tape lines)
+		context.strokeStyle = "#000";
+		for (r in _.range(1, 6)) {
+			r = parseInt(r);
+			i = (r+1)*12*PX_SCALE;
+			draw_line(context, [1*12*PX_SCALE, i], [5*12*PX_SCALE, i]);
+			draw_line(context, [i, 1*12*PX_SCALE], [i, 5*12*PX_SCALE]);
+		}
+
+		// Draw orientation marker
+		context.strokeStyle = "#00f";
+		context.fillStyle = '#00f';
+		context.textBaseline = "middle";
+
+		draw_arrow(context, [PX_SCALE*1, PX_SCALE*1], [PX_SCALE*4, PX_SCALE*1]);
+		draw_arrow(context, [PX_SCALE*1, PX_SCALE*1], [PX_SCALE*1, PX_SCALE*4]);
+		context.fillText('+x', PX_SCALE*5, PX_SCALE*1);
+		context.textAlign = 'center';
+		context.fillText('+y', PX_SCALE*1, PX_SCALE*5);
+		context.textAlign = 'left';
+
+		// Draw 1" scale marker
+		context.strokeStyle = "#f00";
+		context.fillStyle = '#f00';
+		context.textBaseline = "middle";
+
+		draw_line(context, [PX_SCALE*7, PX_SCALE], [PX_SCALE*8, PX_SCALE]);
+		draw_line(context, [PX_SCALE*7, PX_SCALE+PX_SCALE/3], [PX_SCALE*7,   PX_SCALE-PX_SCALE/3]);
+		draw_line(context, [PX_SCALE*8, PX_SCALE+PX_SCALE/3], [PX_SCALE*8, PX_SCALE-PX_SCALE/3]);
+		var orig_font = context.font;
+		context.font = "bold 11px sans-serif";
+		context.fillText('1 inch', PX_SCALE*9, PX_SCALE);
+		context.font = orig_font;
+
+		// Draw Transmitter Box
+		function draw_square(context, center, radius) {
+			for (var off=-radius; off<=radius; off += (2*radius)) {
+				context.beginPath();
+				context.moveTo(center[0]+off, center[1]+off);
+				context.lineTo(center[0]-off, center[1]+off);
+				context.stroke();
+				context.beginPath();
+				context.moveTo(center[0]+off, center[1]+off);
+				context.lineTo(center[0]+off, center[1]-off);
+				context.stroke();
+			}
+		}
+
+		// Draw Transmitters
+		context.strokeStyle = "#00f";
+
+		context.beginPath();
+		context.arc(tx(0), ty(0), 15, 0, 2 * Math.PI, false);
+		context.stroke();
+		for (var x_off=-12*PX_SCALE; x_off<=12*PX_SCALE; x_off += (2*12*PX_SCALE)) {
+			for (var y_off=-12*PX_SCALE; y_off<=12*PX_SCALE; y_off += (2*12*PX_SCALE)) {
+				context.beginPath();
+				context.arc(tx(x_off), ty(y_off), 14, 0, 2 * Math.PI, false);
+				context.stroke();
+			}
+		}
+	}
+
+	draw_background();
+
+	function draw_loc(context, loc, rot, age) {
+		var x = tx((loc[0] / 2.54) * PX_SCALE)
+		var y = ty((loc[1] / 2.54) * PX_SCALE)
+		var z = loc[2];
+		context.beginPath();
+		//console.log('Drawing loc at (' + x + ',' + y + ')');
+		context.arc(x, y, 5, 0, 2 * Math.PI, false);
+
+		context.globalAlpha = Math.max(0, 1-(age / age_out));
+		//console.log("alpha: " + context.globalAlpha);
+		context.fillStyle = '#faa';
+		context.strokeStyle = '#f44' //"#f66";
+		context.fill();
+		context.lineWidth = 2;
+		context.stroke();
+
+		context.strokeStyle = '#00f' //"#f66";
+		context.lineWidth = 1.5;
+		//context.beginPath();
+		//context.moveTo(x, y)
+		//console.log(rot);
+		//var x_rot = rot[0][0] * 30;
+		//var y_rot = rot[0][1] * 30;
+		//console.log('x_rot ' + x_rot + ' y_rot ' + y_rot);
+		//context.lineTo(x-x_rot, y+y_rot)
+		var x_rot = rot[0][0] * 30;
+		var y_rot = -rot[0][1] * 30;
+		draw_arrow(context, [x,y], [x+x_rot, y+y_rot]);
+	}
+
+	function draw_all_locs() {
+		var dots_ctx = dots_canvas_xy.getContext('2d');
+		dots_ctx.clearRect(0, 0, WIDTH, HEIGHT);
+		if (loc_hist.length == 0) return;
+
+		while ((loc_hist[0]['display_rx_time'] + age_out) < Date.now()) {
+			console.log('Aged out entry (now: ' + Date.now() + ' disp_rx_time: ' + loc_hist[0]['display_rx_time'] + ')');
+			loc_hist.shift();
+			if (loc_hist.length == 0) return;
+		}
+		for (var i=0; i < loc_hist.length; i++) {
+			var loc = loc_hist[i]['rx_location'];
+			var rot = loc_hist[i]['rx_rotation'];
+			var age = Math.max(1, Date.now() - loc_hist[i]['display_rx_time']);
+			draw_loc(dots_ctx, loc, rot, age);
+		}
+	}
+
+	var updater_interval = setInterval(function(){draw_all_locs()}, 500);
+
+	onload = function() {
+		socket_loc = io.connect('inductor.eecs.umich.edu:8082/stream');
+		socket_loc.on('connect', function (data) {
+			socket_loc.emit('query', {'profile_id': LOC_VLC_PID});
+		});
+
+		socket_loc.on('data', function (data) {
+			data['display_rx_time'] = Date.now();
+			console.log(data);
+			loc_hist.push(data);
+		});
+	}
+
+	function on_grid_cb_click() {
+		draw_background();
+	}
+
+	</script>
+
+{% endblock %}

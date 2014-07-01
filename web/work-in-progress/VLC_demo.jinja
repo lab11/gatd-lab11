@@ -117,14 +117,22 @@ VLC Location
 		}
 
 		// Draw 1' height markers
+		var orig_font = context.font;
+		context.font = "bold 11px sans-serif";
 		context.strokeStyle = "#444";
 		context.setLineDash([PX_SCALE/2])
 		for (r in _.range(1, 7)) {
 			r = parseInt(r);
 			i = (r+1)*12*PX_SCALE;
 			draw_line(context, [i, 0], [i, HEIGHT]);
+			if ((r+1) == 1) {
+				context.fillText((r+1) + ' foot', i+PX_SCALE, PX_SCALE);
+			} else {
+				context.fillText((r+1) + ' feet', i+PX_SCALE, PX_SCALE);
+			}
 		}
 		context.setLineDash([0])
+		context.font = orig_font;
 
 		// Draw orientation marker
 		context.strokeStyle = "#00f";

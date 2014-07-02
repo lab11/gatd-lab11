@@ -58,9 +58,10 @@ Hemera-Based Indoor Monitoring
 </div>
 
 <script>
-var PID = 'TtYWhXKRke';
+var PROFILE_ID = 'TtYWhXKRke';                                      
+var MOTE_ID    = 4;                                                 
+var TIME_SPAN  = 15; // time range (in minutes) to display on graph  
 var socket;
-var pre = 5; // time range (in minutes) to display on graph
 var mtn = 0; // initialize to no motion detected
 var convert = function (data) {
     var tmp = data['temperature'] * .018 - 40;
@@ -74,12 +75,12 @@ var convert = function (data) {
     add_to_graph(g1, 'Humidity (%)'   , tim, hum, get_color(10), 0);
     add_to_graph(g1, 'Light (Lx)'     , tim, lux, get_color(12), 0);
     mtn = data['motion'];
-    change ( "Temperature (F)", Math.round(tmp) );
-    change ( "Humidity (%)", Math.round((hum > 100) ? 100 : hum) );
-    change ( "Light (Lx)", Math.round(lux) );
-    document.querySelector("#Motion").innerHTML = mtn ? "Some" : "None";
-    document.querySelector('#status').style.background = "rgb(" + Math.round(2.8 * tmp) + "," + 127 + "," + Math.round(255 - tmp * 2.8) + ")"; 
-    document.querySelector('#status').className = document.querySelector("#Motion").innerHTML;
+    change ( 'Temperature (F)', Math.round(tmp) );
+    change ( 'Humidity (%)', Math.round((hum > 100) ? 100 : hum) );
+    change ( 'Light (Lx)', Math.round(lux) );
+    document.querySelector('#Motion').innerHTML = mtn ? 'Some' : 'None';
+    document.querySelector('#status').style.background = 'rgb(' + Math.round(2.8 * tmp) + ',' + 127 + ',' + Math.round(255 - tmp * 2.8) + ')'; 
+    document.querySelector('#status').className = document.querySelector('#Motion').innerHTML;
     if (mtn) document.querySelector('#time').innerHTML = (new Date(tim)).toLocaleTimeString();
 }
 var change = function (nid,next,timeval) {
@@ -96,11 +97,11 @@ var change = function (nid,next,timeval) {
 }
 onload = function() {
     socket = io.connect('inductor.eecs.umich.edu:8082/stream');
-    socket.on('connect', function (data) { socket.emit('query', { 'profile_id': PID, 'time': pre*60*1000 }); });
+    socket.on('connect', function (data) { socket.emit('query', { 'profile_id': PROFILE_ID, 'time': TIME_SPAN*60*1000, 'id':MOTE_ID}); });
     socket.on('data',    function (data) { convert(data); });
-    g1 = $.grapher( $("#graph1") , {
-            legend: {show: true, position:"nw"},
-            xaxis:  {show:true, width:pre*60*1000, mode: "time", tickFormatter:x_format},
+    g1 = $.grapher( $('#graph1') , {
+            legend: {show: true, position:'nw'},
+            xaxis:  {show:true, width:TIME_SPAN*60*1000, mode: 'time', tickFormatter:x_format},
             yaxis:  {max:100, min:0}, 
             grid:   {margin: {top: 8, bottom: 20, left: 20, right: 20}, borderWidth:1, borderColor:'#999'},
         });

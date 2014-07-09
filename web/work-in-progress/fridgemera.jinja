@@ -1,6 +1,6 @@
 {#
 
-DUTTECTION
+FRIDGEMERA
 
 #}
 
@@ -26,15 +26,15 @@ DUTTECTION
 {% endblock %}
 
 {% block title %}
-Duttection
+Fridgemera
 {% endblock %}
 
 {% block page_title %}
-Duttection
+Fridgemera
 {% endblock %}
 
 {% block tagline %}
-Hemera-Based Indoor Monitoring
+Hemera-Based Refridgerator Monitoring
 {% endblock %}
 
 {% block content %}
@@ -48,10 +48,9 @@ Hemera-Based Indoor Monitoring
                 <span style='font-weight:300; font-size:12pt; margin-bottom:10px;'>(Sampling Every 3 Seconds)</span><br />
                 Temperature <span id="Temperature (F)">0</span><span>&deg;F</span><br />
                 Humidity    <span id="Humidity (%)">0</span><span>%</span><br />
-                Light       <span id="Light (Lx)">0</span><span>Lx</span><br />
                 Motion      <span id="Motion">None</span><br />
             </div>
-            <div style='text-align:center; width:300px; margin:0 auto'><span>Last Duttection:</span><br /><span id='time'></span></div>
+            <div style='text-align:center; width:300px; margin:0 auto'><span>Last Open:</span><br /><span id='time'></span></div>
         </div>
         <div class="col-sm-1 col-xs-0">
     </div>
@@ -59,29 +58,38 @@ Hemera-Based Indoor Monitoring
 
 <script>
 var PROFILE_ID = 'TtYWhXKRke';                                      
-var MOTE_ID    = 4;                                                 
-var TIME_SPAN  = 15; // time range (in minutes) to display on graph  
-var socket;
-var mtn = 0; // initialize to no motion detected
+var MOTE_ID    = 12;      
+var TIME_SPAN  = 2*24*60; // time range in minutes for Duttection                                             
+var GRAPH_SPAN  = 15; // time range (in minutes) to display on graph  
+var socket, blah, graphtime;
+var motion = 0; // initialize to no motion detected
 var convert = function (data) {
-    var tmp = data['temperature'] * .018 - 40;
-    var hum = -2.0468 + data['humidity'] * .0367 + Math.pow(data['humidity'],2) * -1.5955e-6;
-    var lux = data['light'] * .8;
     var tim = data['time'];
-    add_to_graph(g1,'',0,0,0,0);
-    pdw={};pd={};pd['Motion']=[tim,mtn*101-1];pdw={name:'',data:pd,lines:{fill:true,lineWidth:0}}; g1.addData(pdw); g1.update(series);
-    pdw={};pd={};pd['Motion']=[tim,data['motion']*102-1];pdw={name:'',data:pd,lines:{fill:true,lineWidth:0}}; g1.addData(pdw); g1.update(series);
-    add_to_graph(g1, 'Temperature (F)', tim, tmp, get_color(8), 0);
-    add_to_graph(g1, 'Humidity (%)'   , tim, hum, get_color(10), 0);
-    add_to_graph(g1, 'Light (Lx)'     , tim, lux, get_color(12), 0);
-    mtn = data['motion'];
-    change ( 'Temperature (F)', Math.round(tmp) );
-    change ( 'Humidity (%)', Math.round((hum > 100) ? 100 : hum) );
-    change ( 'Light (Lx)', Math.round(lux) );
-    document.querySelector('#Motion').innerHTML = mtn ? 'Some' : 'None';
-    document.querySelector('#status').style.background = 'rgb(' + Math.round(2.8 * tmp) + ',' + 127 + ',' + Math.round(255 - tmp * 2.8) + ')'; 
-    document.querySelector('#status').className = document.querySelector('#Motion').innerHTML;
+    var mtn = data['motion'];
+    if (tim>=graphtime) {
+        var tmp = data['temperature'] * .018 - 40;
+        var hum = -2.0468 + data['humidity'] * .0367 + Math.pow(data['humidity'],2) * -1.5955e-6;
+        var lux = data['light'] * .8;
+        add_to_graph(g1,'',0,0,0,0);
+        pdw={};pd={};pd['Motion']=[tim,motion*101-1];pdw={name:'',data:pd,lines:{fill:true,lineWidth:0}}; g1.addData(pdw); g1.update(series);
+        pdw={};pd={};pd['Motion']=[tim,data['motion']*102-1];pdw={name:'',data:pd,lines:{fill:true,lineWidth:0}}; g1.addData(pdw); g1.update(series);
+        add_to_graph(g1, 'Temperature (F)', tim, tmp, get_color(8), 0);
+        add_to_graph(g1, 'Humidity (%)'   , tim, hum, get_color(10), 0);
+        add_to_graph(g1, 'Light (Lx)'     , tim, lux, get_color(12), 0);
+        change ( 'Temperature (F)', Math.round(tmp) );
+        change ( 'Humidity (%)', Math.round((hum > 100) ? 100 : hum) );
+        change ( 'Light (Lx)', Math.round(lux) );
+        document.querySelector('#status').style.background = 'rgb(' + Math.round(2.8 * tmp) + ',' + 127 + ',' + Math.round(255 - tmp * 2.8) + ')';         
+        document.querySelector('#Motion').innerHTML = mtn ? 'Some' : 'None';
+        document.querySelector('#status').className = document.querySelector('#Motion').innerHTML;
+        motion = mtn;
+    }
     if (mtn) document.querySelector('#time').innerHTML = (new Date(tim)).toLocaleTimeString();
+}
+var lasttime = function (data) {
+    console.log(data);
+    var tim = data['time'];
+    document.querySelector('#time').innerHTML = (new Date(tim)).toLocaleTimeString();
 }
 var change = function (nid,next,timeval) {
     var current  = document.getElementById(nid).innerHTML;
@@ -96,12 +104,16 @@ var change = function (nid,next,timeval) {
     else if (current!=next) dig();
 }
 onload = function() {
+    graphtime = (new Date()).getTime() - GRAPH_SPAN*60*1000;
     socket = io.connect('inductor.eecs.umich.edu:8082/stream');
     socket.on('connect', function (data) { socket.emit('query', { 'profile_id': PROFILE_ID, 'time': TIME_SPAN*60*1000, 'id':MOTE_ID}); });
     socket.on('data',    function (data) { convert(data); });
+    // blah = io.connect('inductor.eecs.umich.edu:8082/stream');
+    // blah.on('connect', function (data) { blah.emit('query', { 'profile_id': PROFILE_ID, 'time': 7*24*60*60*1000, motion: true, 'id':MOTE_ID}); });
+    // blah.on('data',    function (data) { lasttime(data); });
     g1 = $.grapher( $('#graph1') , {
             legend: {show: true, position:'nw'},
-            xaxis:  {show:true, width:TIME_SPAN*60*1000, mode: 'time', tickFormatter:x_format},
+            xaxis:  {show:true, width:GRAPH_SPAN*60*1000, mode: 'time', tickFormatter:x_format},
             yaxis:  {max:100, min:0}, 
             grid:   {margin: {top: 8, bottom: 20, left: 20, right: 20}, borderWidth:1, borderColor:'#999'},
         });

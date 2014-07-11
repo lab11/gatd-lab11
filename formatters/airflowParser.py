@@ -21,7 +21,10 @@ class airflowParser ():
 			ret['type'] = 'airflow_test'
 			ret['version'] = values[0]
 			ret['airflow_reading'] = values[1]
-			#if ret['airflow_reading'] >
+			if ret['airflow_reading'] > 7000:
+				req['airflow_state'] = 'on'
+			else:
+				req['airflow_state'] = 'off'
 			ret['seq_no'] = values[2]
 
 		ret['address'] = str(meta['addr'])

@@ -11,7 +11,7 @@ import sys
 class duttectionParser ():
 
 	name = 'Hemera Sensor Data'
-	description = 'Light, humidity, temperature, & motion in Prabal\'s office.'
+	description = 'Light, humidity, temperature, & motion.'
 	no_parse = False
 
 	def __init__ (self):
@@ -21,7 +21,7 @@ class duttectionParser ():
 		ret = {}
 
 		try:
-			ret = json.loads(data)
+			ret = json.loads(data[10:])
 
 		except ValueError:
 			values = struct.unpack('!10s H H H H B B', data[0:20])

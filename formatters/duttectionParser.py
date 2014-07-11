@@ -20,21 +20,25 @@ class duttectionParser ():
 	def parse (self, data, meta, extra, settings):
 		ret = {}
 
-		values = struct.unpack('!10s H H H H B B', data[0:20])
+		try:
+			ret = json.loads(data)
 
-		# ret['profile_id']  = values[0]
-		ret['sequence']    = values[1]
-		ret['temperature'] = values[2]
-		ret['humidity']    = values[3]
-		ret['light']       = values[4]
-		ret['motion']      = bool(values[5])
-		ret['id']          = values[6]
-		# ret['battery']     = values[6]
+		except ValueError:
+			values = struct.unpack('!10s H H H H B B', data[0:20])
 
-		# Standard GATD Footer
-		ret['address'] = str(meta['addr'])
-		ret['port']    = meta['port']
-		ret['time']    = meta['time']
+			# ret['profile_id']  = values[0]
+			ret['sequence']    = values[1]
+			ret['temperature'] = values[2]
+			ret['humidity']    = values[3]
+			ret['light']       = values[4]
+			ret['motion']      = bool(values[5])
+			ret['id']          = values[6]
+			# ret['battery']     = values[6]
+
+			# Standard GATD Footer
+			ret['address'] = str(meta['addr'])
+			ret['port']    = meta['port']
+			ret['time']    = meta['time']
 	
 		return ret
 

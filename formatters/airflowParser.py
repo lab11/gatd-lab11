@@ -17,7 +17,7 @@ class airflowParser ():
 		data = data[11:]
 
 		if airflow_type == 0:
-			values = struct.unpac("!BhL", data)
+			values = struct.unpack("!BhL", data)
 			ret['type'] = 'airflow_test'
 			ret['version'] = values[0]
 			ret['airflow_reading'] = values[1]

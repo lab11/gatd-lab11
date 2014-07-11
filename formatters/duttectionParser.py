@@ -8,7 +8,7 @@ import pytz
 import time
 import sys
 
-class duttectionParser ():
+class duttectionParser (parser.parser):
 
 	name = 'Hemera Sensor Data'
 	description = 'Light, humidity, temperature, & motion.'
@@ -21,7 +21,8 @@ class duttectionParser ():
 		ret = {}
 
 		try:
-			ret = json.loads(data[10:])
+			jsonpkt = json.loads(data[10:])
+			ret     = json.loads(jsonpkt['data'])
 
 		except ValueError:
 			values = struct.unpack('!10s H H H H B B', data[0:20])

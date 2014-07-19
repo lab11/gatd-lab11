@@ -1,0 +1,87 @@
+{% extends "base_intro.jinja" %}
+
+
+{% block includes %}
+<script src="js/jquery.flot.custom-0.8.2.js"></script>
+<script src="bower_components/flot/jquery.flot.time.js"></script>
+<script src="js/jquery.grapher.js"></script>
+<script src="js/gatd_graph.js"></script>
+
+<link href="css/gatd_graph.css" media="all" rel="stylesheet" type="text/css" />
+{% endblock %}
+
+{% block title %}
+HVAC Detection
+{% endblock %}
+
+{% block page_title %}
+HVAC Detection
+{% endblock %}
+
+{% block tagline %}
+with Tessel Climate Module
+{% endblock %}
+
+{% block information %}
+<p>
+Data collected using a Tessel climate module attached to a vent to detect on/off HVAC states.
+</p>
+{% endblock %}
+
+{% block content %}
+
+<div id="body">
+	<div>
+		<div id="graph" class="box_shadow graph"></div>
+	</div>
+	<div id="key" class="box_shadow key">
+		<table id="key_table">
+			<thead><tr>
+					<th>Index</th>
+					<th>ID</th>
+					<th>Location</th>
+					<th>Temperature</th>
+			</tr></thead>
+			<tbody id="key_table_tbody"></tbody>
+		</table>
+	</div>
+</div>
+
+<script>
+
+var TESSEL_CLIMATE_PID = 'oBNeydOsio';
+var socket_climate;
+
+onload = function() {
+	socket_climate = io.connect('inductor.eecs.umich.edu:8082/stream');
+	socket_climate.on('connect', function (data) {
+		socket_climate.emit('query', {'profile_id': TESSEL_CLIMATE_PID,
+		                         '_processor_freq':'last',
+		                         'time': 7200000}
+		              );
+	});
+
+	socket_climate.on('data', function (data) {
+		var color = '#0000FF'
+		add_to_key(g,
+			data['device_id'],
+			data['location_str'],
+			data['temperature'],
+			color);
+		fixup_index();
+		add_to_graph(g, data['device_id'], data['time'], data['temperature'], color);
+	});
+
+	g = $.grapher($("#graph"),
+		{legend: {show: false, conainer: $("#graph_key")},
+		 xaxis:  {show:true, width:7200000, mode: "time", tickFormatter:x_format},
+		 yaxis:  {min:0, label:"Frequency (Activations/Second)", max:4},
+		 grid:   {margin: {top: 8, bottom: 20, left: 25, right: 25}},
+		});
+
+	$("th").click(function() {
+		series = 'all';
+	});
+}
+</script>
+{% endblock %}

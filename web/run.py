@@ -38,7 +38,7 @@ parser.add_argument('--debug',
                     help='Run a local webserver')
 parser.add_argument('--monitor',
                     action='store_true',
-                    help='Do not watch for changes')
+                    help='Watch for changes')
 args = parser.parse_args()
 
 def build_site():

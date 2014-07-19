@@ -1,0 +1,115 @@
+{#
+
+WHEREABOUTS
+
+#}
+
+{% extends "base_intro.jinja" %}
+
+{% block includes %}
+<script src="/js/whereabouts.js"></script>
+{% endblock %}
+
+{% block title %}
+Whereabouts
+{% endblock %}
+
+{% block page_title %}
+Whereabouts
+{% endblock %}
+
+{% block tagline %}
+Semantic Heuristic Localization
+{% endblock %}
+
+{% block content %}
+<div id="body" style="margin-top:5px;">
+  <div class="person_group" style="text-align: left;">
+    <div style="text-align: center;">
+      <div id="people_row" class="row" style="margin-bottom:5px;">
+      </div>
+      <div id="empty_text">
+        <h3>There doesn't appear to be anyone here right now</h3>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var CC_PID = 'hsYQx8blbd';
+var socket_cc;
+
+/*
+// for testing
+function sleep(millis, callback) {
+  setTimeout(function(){callback();}, millis);
+}
+
+function data_3() {
+  // TESTING
+  var person_list = [{'brghena': "Branden Ghena"}, {'ppannuto': "Pat Pannuto"}, {'samkuo': 'Ye-Sheng Kuo'}];
+  var loc = "lab";
+  var time = new Date().getTime();
+  var since_list = [{'brghena': 5000}, {'ppannuto': 5001}, {'samkuo': 5002}];
+  console.log("\n\n***DATA 3***");
+  record_presence(person_list, loc, time, since_list);
+  console.log("DONE");
+}
+
+function data_2() {
+  // TESTING
+  var person_list = [{'brghena': "Branden Ghena"}, {'samkuo': 'Ye-Sheng Kuo'}];
+  var loc = "lab";
+  var time = new Date().getTime();
+  var since_list = [{'brghena': 5000}, {'samkuo': 5002}];
+  console.log("\n\n***DATA 2***");
+  record_presence(person_list, loc, time, since_list);
+  sleep(5000, data_3);
+}
+
+function data_1() {
+  // TESTING
+  var person_list = [{'bradjc': "Brad Campbell"}, {'brghena': "Branden Ghena"}, {'ppannuto': 'Pat Pannuto'}, {'samkuo': 'Ye-Sheng Kuo'}];
+  var loc = "lab";
+  var time = new Date().getTime();
+  var since_list = [{'bradjc': 1003}, {'brghena': 1000}, {'ppannuto': 1001}, {'samkuo': 1002}];
+  console.log("\n\n***DATA 1***");
+  record_presence(person_list, loc, time, since_list);
+  sleep(5000, data_2);
+}
+
+function data_0() {
+  // TESTING
+  var person_list = [{'brghena': "Branden Ghena"}, {'ppannuto': 'Pat Pannuto'}, {'samkuo': 'Ye-Sheng Kuo'}];
+  var loc = "lab";
+  var time = new Date().getTime();
+  var since_list = [{'brghena': 0}, {'ppannuto': 1}, {'samkuo': 2}];
+  console.log("\n\n***DATA 0***");
+  record_presence(person_list, loc, time, since_list);
+  sleep(5000, data_1);
+}
+*/
+
+onload = function() {
+  socket_cc = io.connect('inductor.eecs.umich.edu:8082/stream');
+  socket_cc.on('connect', function (data) {
+      // Queries 30 minutes into the past
+      socket_cc.emit('query', {'profile_id': CC_PID,
+        'time': 30*60*1000
+        }
+        );
+      });
+
+  socket_cc.on('data', function (data) {
+      //console.log(data['person_list'].toString() + " " +
+      //        data['time'] + " " + data['location_str']);
+      record_presence(data['person_list'], data['location_str'], data['time'], data['since_list']);
+      });
+
+    // if testing
+    // data_0();
+}
+
+</script>
+
+{% endblock %}

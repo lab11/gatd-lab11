@@ -1,6 +1,6 @@
 import parser
 
-class ninjaBlocksClimateParser (parser):
+class ninjaBlocksClimateParser ():
 
 	# Parameters for this profile
 	name = 'Ninja Blocks Climate'

@@ -1,6 +1,6 @@
 import parser
 
-class ninjaBlocksRFParser (parser.parser):
+class ninjaBlocksRFParser (parser):
 
 	# Parameters for this profile
 	name = 'Ninja Blocks RF'

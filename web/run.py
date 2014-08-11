@@ -53,37 +53,75 @@ def build_site():
 		WORKING_DIR = tempfile.mkdtemp()
 
 		demos = {}
+		demo_data = {} # dictionary of filename -> [name, description]
+
 		for directory in DIRECTORIES:
 			demos[directory] = []
+			demo_data[directory] = {}
 
 			for filename in glob.glob(directory + '/*.jinja'):
 				basedir, name = os.path.split(filename)
 				name = os.path.splitext(name)[0]
 				outputname = os.path.join(WORKING_DIR, name + '.html')
 
-				if name != 'index':
-					demos[directory].append(name + '.html')
-
 				output = je.get_template(filename).render()
 
 				with open(outputname, 'w') as f:
 					f.write(output)
+
+				if name != 'index':
+					html_name = name + '.html'
+					demos[directory].append(html_name)
+
+					# default name and description
+					name = os.path.splitext(html_name)[0].replace('_', ' ')
+					name = titlecase.titlecase(name)
+					desc = name
+
+					# open file to read from it
+					with open(filename, 'r') as f:
+						for line in f:
+							if line[0:8] == '{#Name: ':
+								# '{#Name: <name>#}\n'
+								name = line[8:-3]
+							if line[0:8] == '{#Desc: ':
+								# '{#Desc: <description>#}\n'
+								desc = line[8:-3]
+
+					demo_data[directory][html_name] = [name, desc]
+				
 			for filename in glob.glob(directory + '/*.html'):
-				basedir, name = os.path.split(filename)
-				dst = os.path.join(WORKING_DIR, name)
-				demos[directory].append(name)
+				basedir, html_name = os.path.split(filename)
+				dst = os.path.join(WORKING_DIR, html_name)
+				demos[directory].append(html_name)
 				cp(filename, dst)
+
+				# default name and description
+				name = os.path.splitext(html_name)[0].replace('_', ' ')
+				name = titlecase.titlecase(name)
+				desc = name
+
+				# open file to read from it
+				with open(filename, 'r') as f:
+					for line in f:
+						if line[0:8] == '{#Name: ':
+							# '{#Name: <name>#}\n'
+							name = line[8:-3]
+						if line[0:8] == '{#Desc: ':
+							# '{#Desc: <description>#}\n'
+							desc = line[8:-3]
+
+				demo_data[directory][html_name] = [name, desc]
 
 		categories = []
 		for directory in DIRECTORIES:
 			demo_list = ''
-			for filename in sorted(demos[directory]):
-				name = os.path.splitext(filename)[0].replace('_', ' ')
-				name = titlecase.titlecase(name)
+
+			# sort demo_data by name
+			for filename, [name, desc] in sorted(demo_data[directory].items(), key=lambda e: e[1][0]):
 				demo_list += je.get_template('demo_item.jinja').render(
-					name=name,
-					path=filename
-					)
+						name=name, desc=desc, path=filename)
+
 			if demo_list == '':
 				# No demos in this category, skip it
 				continue

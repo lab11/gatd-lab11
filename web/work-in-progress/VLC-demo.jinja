@@ -1,5 +1,5 @@
 {#Name: VLC Floor Demo#}
-{#Desc: Real-time localization using visible light on a floor testbed. Demo for Mobicom'14.#}
+{#Desc: Real-time localization using visible light on a floor testbed. Demo for Mobicom'14, VLCS'14, and Terraswarm '14.#}
 
 {% extends "base.jinja" %}
 
@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block title %}
-VLC Location - Simple Grid
+VLC Location - Floor Demo
 {% endblock %}
 
 {% block page_title %}
@@ -74,7 +74,7 @@ VLC Location
 	}
 
 	function ty(y) {
-		return y + HEIGHT / 2;
+		return -y + HEIGHT / 2;
 	}
 
 	function t(pt) {
@@ -136,11 +136,11 @@ VLC Location
 		context.fillStyle = '#00f';
 		context.textBaseline = "middle";
 
-		draw_arrow(context, [PX_SCALE*1, PX_SCALE*1], [PX_SCALE*4, PX_SCALE*1]);
-		draw_arrow(context, [PX_SCALE*1, PX_SCALE*1], [PX_SCALE*1, PX_SCALE*4]);
-		context.fillText('+z', PX_SCALE*5, PX_SCALE*1);
+		draw_arrow(context, [PX_SCALE*1, HEIGHT-PX_SCALE*1], [PX_SCALE*4, HEIGHT-PX_SCALE*1]);
+		draw_arrow(context, [PX_SCALE*1, HEIGHT-PX_SCALE*1], [PX_SCALE*1, HEIGHT-PX_SCALE*4]);
+		context.fillText('+z', PX_SCALE*5, HEIGHT-PX_SCALE*1);
 		context.textAlign = 'center';
-		context.fillText('+y', PX_SCALE*1, PX_SCALE*5);
+		context.fillText('+y', PX_SCALE*1, HEIGHT-PX_SCALE*5.5);
 		context.textAlign = 'left';
 
 		// Draw 1" scale marker
@@ -148,12 +148,12 @@ VLC Location
 		context.fillStyle = '#f00';
 		context.textBaseline = "middle";
 
-		draw_line(context, [PX_SCALE*7, PX_SCALE], [PX_SCALE*8, PX_SCALE]);
-		draw_line(context, [PX_SCALE*7, PX_SCALE+PX_SCALE/3], [PX_SCALE*7,   PX_SCALE-PX_SCALE/3]);
-		draw_line(context, [PX_SCALE*8, PX_SCALE+PX_SCALE/3], [PX_SCALE*8, PX_SCALE-PX_SCALE/3]);
+		draw_line(context, [PX_SCALE*7, HEIGHT-PX_SCALE], [PX_SCALE*8, HEIGHT-PX_SCALE]);
+		draw_line(context, [PX_SCALE*7, HEIGHT-(PX_SCALE+PX_SCALE/3)], [PX_SCALE*7, HEIGHT-(PX_SCALE-PX_SCALE/3)]);
+		draw_line(context, [PX_SCALE*8, HEIGHT-(PX_SCALE+PX_SCALE/3)], [PX_SCALE*8, HEIGHT-(PX_SCALE-PX_SCALE/3)]);
 		var orig_font = context.font;
 		context.font = "bold 11px sans-serif";
-		context.fillText('1 inch', PX_SCALE*9, PX_SCALE);
+		context.fillText('1 inch', PX_SCALE*9, HEIGHT-PX_SCALE);
 		context.font = orig_font;
 
 		// Draw Transmitter Box
@@ -174,13 +174,16 @@ VLC Location
 		context.strokeStyle = "#00f";
 
 		context.beginPath();
-		context.arc(0, 2*12*PX_SCALE, 14, 0, 2 * Math.PI, false);
+		context.arc(0, ty(-13.5*PX_SCALE), 14, 0, 2 * Math.PI, false);
 		context.stroke();
 
 		context.beginPath();
-		context.arc(0, 4*12*PX_SCALE, 14, 0, 2 * Math.PI, false);
+		context.arc(0, ty(11.25*PX_SCALE), 14, 0, 2 * Math.PI, false);
 		context.stroke();
 
+		context.beginPath();
+		context.arc(0, ty(13.5*PX_SCALE), 14, 0, 2 * Math.PI, false);
+		context.stroke();
 	}
 
 	function draw_background_xy() {
@@ -221,11 +224,11 @@ VLC Location
 		context.fillStyle = '#00f';
 		context.textBaseline = "middle";
 
-		draw_arrow(context, [PX_SCALE*1, PX_SCALE*1], [PX_SCALE*4, PX_SCALE*1]);
-		draw_arrow(context, [PX_SCALE*1, PX_SCALE*1], [PX_SCALE*1, PX_SCALE*4]);
-		context.fillText('+x', PX_SCALE*5, PX_SCALE*1);
+		draw_arrow(context, [PX_SCALE*1, HEIGHT-PX_SCALE*1], [PX_SCALE*4, HEIGHT-PX_SCALE*1]);
+		draw_arrow(context, [PX_SCALE*1, HEIGHT-PX_SCALE*1], [PX_SCALE*1, HEIGHT-PX_SCALE*4]);
+		context.fillText('+x', PX_SCALE*5, HEIGHT-PX_SCALE*1);
 		context.textAlign = 'center';
-		context.fillText('+y', PX_SCALE*1, PX_SCALE*5);
+		context.fillText('+y', PX_SCALE*1, HEIGHT-PX_SCALE*5.5);
 		context.textAlign = 'left';
 
 		// Draw 1" scale marker
@@ -233,12 +236,12 @@ VLC Location
 		context.fillStyle = '#f00';
 		context.textBaseline = "middle";
 
-		draw_line(context, [PX_SCALE*7, PX_SCALE], [PX_SCALE*8, PX_SCALE]);
-		draw_line(context, [PX_SCALE*7, PX_SCALE+PX_SCALE/3], [PX_SCALE*7,   PX_SCALE-PX_SCALE/3]);
-		draw_line(context, [PX_SCALE*8, PX_SCALE+PX_SCALE/3], [PX_SCALE*8, PX_SCALE-PX_SCALE/3]);
+		draw_line(context, [PX_SCALE*7, HEIGHT-PX_SCALE], [PX_SCALE*8, HEIGHT-PX_SCALE]);
+		draw_line(context, [PX_SCALE*7, HEIGHT-(PX_SCALE+PX_SCALE/3)], [PX_SCALE*7, HEIGHT-(PX_SCALE-PX_SCALE/3)]);
+		draw_line(context, [PX_SCALE*8, HEIGHT-(PX_SCALE+PX_SCALE/3)], [PX_SCALE*8, HEIGHT-(PX_SCALE-PX_SCALE/3)]);
 		var orig_font = context.font;
 		context.font = "bold 11px sans-serif";
-		context.fillText('1 inch', PX_SCALE*9, PX_SCALE);
+		context.fillText('1 inch', PX_SCALE*9, HEIGHT-PX_SCALE);
 		context.font = orig_font;
 
 		// Draw Transmitter Box
@@ -259,15 +262,24 @@ VLC Location
 		context.strokeStyle = "#00f";
 
 		context.beginPath();
-		context.arc(tx(0), ty(0), 15, 0, 2 * Math.PI, false);
+		context.arc(tx(-2*PX_SCALE), ty(-2*PX_SCALE), 15, 0, 2 * Math.PI, false);
 		context.stroke();
-		for (var x_off=-12*PX_SCALE; x_off<=12*PX_SCALE; x_off += (2*12*PX_SCALE)) {
-			for (var y_off=-12*PX_SCALE; y_off<=12*PX_SCALE; y_off += (2*12*PX_SCALE)) {
-				context.beginPath();
-				context.arc(tx(x_off), ty(y_off), 14, 0, 2 * Math.PI, false);
-				context.stroke();
-			}
-		}
+
+		context.beginPath();
+		context.arc(tx(-13.25*PX_SCALE), ty(11.25*PX_SCALE), 15, 0, 2 * Math.PI, false);
+		context.stroke();
+
+		context.beginPath();
+		context.arc(tx(13*PX_SCALE), ty(13.5*PX_SCALE), 15, 0, 2 * Math.PI, false);
+		context.stroke();
+
+		context.beginPath();
+		context.arc(tx(-12.75*PX_SCALE), ty(-13.5*PX_SCALE), 15, 0, 2 * Math.PI, false);
+		context.stroke();
+
+		context.beginPath();
+		context.arc(tx(11.25*PX_SCALE), ty(-13.5*PX_SCALE), 15, 0, 2 * Math.PI, false);
+		context.stroke();
 	}
 
 	draw_background_yz();

@@ -4,7 +4,7 @@ import json
 import struct
 import parser
 
-class monjoloParser (parser.parser):
+class monjoloParser ():
 
 	# Parameters for this profile
 	name = 'Monjolo'
@@ -21,7 +21,7 @@ class monjoloParser (parser.parser):
 		cc_version = values[10]
 		data = data[11:]
 
-		if cc_version >= 1 and cc_version <= 6:
+		if cc_version >= 1 and cc_version <= 7:
 			if len(data) != 2:
 				# not sure what to do
 				print "COILCUBE: Too short!"

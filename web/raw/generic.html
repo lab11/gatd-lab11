@@ -1,0 +1,124 @@
+<!--
+{#Name: Generic Stream Access#}
+{#Desc: Access to any raw GATD stream.#}
+-->
+
+<html>
+<head>
+	<script src="/bower_components/socket.io-client/dist/socket.io.min.js"></script>
+	<script src="/bower_components/jquery/dist/jquery.min.js"></script>
+	<script src="/bower_components/jsIP/jsIP.js"></script>
+	<script src="/bower_components/bignumber.js/bignumber.min.js"></script>
+	<script>WEB_SOCKET_SWF_LOCATION='/bower_components/socket.io-client/dist/WebSocketMain.swf'</script>
+	<title>Raw Streams</title>
+
+</head>
+
+<body>
+	<h1>GATD Generic Stream Access</h1>
+
+	Profile ID: <input type="text" name="profile_id" id="profile_id">
+	<button type="button" onclick="the_button_onclick();" id="the_button">Click to Start</button>
+	<br />
+	<!--
+	for f in `ls ../../gatd-lab11/formatters/*.py`; do echo "<option value=\"$(python profile.py --lookup-only --parser $(basename $f))\">$(basename $f)</input>option>"; done
+	-->
+	Known IDs: <select onchange="the_select_onchange();" id="the_select">
+		<option value="" disabled selected>(Choose Parser)</option>
+<option value="G9T58vZ7Bi">airflowParser.py</option>
+<option value="FzZS6YHHTY">aqeParser.py</option>
+<option value="ySYH83QLG2">bleAddrParser.py</option>
+<option value="9YWtcF3MFW">buttonParser.py</option>
+<option value="aWXe5FTVxu">computerStatsParser.py</option>
+<option value="U8H29zqH0i">doorrfidParser.py</option>
+<option value="TtYWhXKRke">duttectionParser.py</option>
+<option value="dwgY2s6mEu">fitbitLocatorParser.py</option>
+<option value="3Ia8L7QfCf">githubParser.py</option>
+<option value="HthZRrHnlC">gridwatchParser.py</option>
+<option value="Sek5SXpFPa">harmoniaParser.py</option>
+<option value="RfPUMe1AuI">hemeraParser.py</option>
+<option value="MUs0XwOiyp">lightControlParser.py</option>
+<option value="UbkhN72jvp">lightStatusParser.py</option>
+<option value="WEgwAGyc9N">localizationVLCParser.py</option>
+<option value="N9NaoNAJzi">m3NearfieldParser.py</option>
+<option value="a1Rk4DLLnp">m3TestingLoggerParser.py</option>
+<option value="PGMR22B9wP">macAddrParser.py</option>
+<option value="PkaJoO4gav">mindWaveParser.py</option>
+<option value="Wr6RQjmTMH">mongoSizeParser.py</option>
+<option value="7aiOPJapXF">monjoloParser.py</option>
+<option value="aPtBADNt1u">ninjaBlocksClimateParser.py</option>
+<option value="z9mcJTXvIX">ninjaBlocksRFParser.py</option>
+<option value="4wbddZCSIj">opoParser.py</option>
+<option value="hsYQx8blbd">presenceParser.py</option>
+<option value="69ARXC5ktb">printerQueryerParser.py</option>
+<option value="VSDXpHtAz3">projectorStatusParser.py</option>
+<option value="1ceFS5btOV">shedCommitParser.py</option>
+<option value="rNTTZYo2ri">swarmTestParser.py</option>
+<option value="nMR0xcWInF">tedParser.py</option>
+<option value="oBNeydOsio">tesselClimateParser.py</option>
+<option value="SgYPCHTR5a">testParser.py</option>
+<option value="YWUr2G8AZP">wattsupParser.py</option>
+<option value="nghjDMLmHY">weatherParser.py</option>
+<option value="fyMfyFW1aU">wemoParser.py</option>
+<option value="OYbmVcHWdN">wundergroundClimateParser.py</option>
+</select>
+
+	<hr />
+
+	<script>
+
+	var socket;
+	var running = false;
+
+	function display_data (data) {
+		out = "<div>";
+		out += "<span>Profile ID: " + data['profile_id'] + "</span>";
+		out += "<ul>";
+		for (var key in data) {
+			out += "<li>" + key + ": " + data[key] + "</li>";
+		}
+		out += "</div>";
+		return out;
+	}
+
+	function streamme () {
+		var profile_id = $("#profile_id").val();
+		console.log("id: " + profile_id);
+		socket = io.connect('inductor.eecs.umich.edu:8082/stream');
+		socket.on('connect', function (data) {
+			socket.emit('query', {'profile_id': profile_id});
+		});
+
+		socket.on('data', function (data) {
+			$("div#stream").prepend(display_data(data));
+		});
+
+		$("#profile_id").prop('disabled', true);
+		$("#the_select").prop('disabled', true);
+		$("#the_button").text('Click to Stop');
+		running = true;
+	}
+
+	function stopme () {
+		socket.removeAllListeners('data');
+
+		$("#the_button").text('Click to Restart');
+		running = false;
+	}
+
+	function the_button_onclick () {
+		if (running) {
+			stopme();
+		} else {
+			streamme();
+		}
+	}
+
+	function the_select_onchange () {
+		$("#profile_id").val($("#the_select").val());
+	}
+	</script>
+
+	<div id="stream"></div>
+</body>
+</html>

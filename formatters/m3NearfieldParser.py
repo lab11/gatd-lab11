@@ -1,10 +1,10 @@
 import parser
+import struct
 
 class m3NearfieldParser (parser.parser):
 
 	name = 'm3 Nearfield Radio'
 	description = 'Michigan Micro Mote bridge parser.'
-	#no_parse = True
 
 	def __init__ (self):
 		pass
@@ -15,6 +15,12 @@ class m3NearfieldParser (parser.parser):
 		# Opo-Specific
 		s = struct.unpack('!10s 28B', data)
 		gatd_profile_id   = s[0]
-		ret['bytes'] = s[1:29]
+
+		temp = 0
+		for b in s[1:]:
+			temp <<= 1
+			temp |= b
+
+		ret['sample'] = temp
 
 		return ret

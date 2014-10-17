@@ -22,5 +22,6 @@ class m3NearfieldParser (parser.parser):
 			temp |= b
 
 		ret['sample'] = temp
+		ret['time']   = meta['time']
 
 		return ret

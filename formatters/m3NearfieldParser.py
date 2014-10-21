@@ -12,8 +12,10 @@ class m3NearfieldParser (parser.parser):
 	def parse (self, data, meta, extra, settings):
 		ret = {}
 
+		l = len(data) - 10
+
 		# Opo-Specific
-		s = struct.unpack('!10s 28B', data)
+		s = struct.unpack('!10s {}B'.format(l), data)
 		gatd_profile_id   = s[0]
 
 		temp = 0

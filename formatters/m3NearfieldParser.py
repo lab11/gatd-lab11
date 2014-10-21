@@ -23,6 +23,11 @@ class m3NearfieldParser (parser.parser):
 			temp <<= 1
 			temp |= b
 
+		ret['ecc'] = temp & 0x3f
+		ret['temp_code'] = (temp >> 6) & 0xffff
+		ret['counter'] = (temp >> 22) & 0xf
+		ret['header'] = (temp >> 26) & 0xf
+
 		ret['sample'] = temp
 		ret['time']   = meta['time']
 

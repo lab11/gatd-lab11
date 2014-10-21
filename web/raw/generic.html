@@ -75,7 +75,11 @@
 		out += "<span>Profile ID: " + data['profile_id'] + "</span>";
 		out += "<ul>";
 		for (var key in data) {
-			out += "<li>" + key + ": " + data[key] + "</li>";
+			if ((typeof data[key] === "number") && Math.floor(data[key]) === data[key]) {
+				out += "<li>" + key + ": " + data[key] + " (<tt>0x" + data[key].toString(16) + "</tt>)</li>";
+			} else {
+				out += "<li>" + key + ": " + data[key] + "</li>";
+			}
 		}
 		out += "</div>";
 		return out;

@@ -106,19 +106,20 @@ class m3NearfieldParser (parser.parser):
 			temp <<= 1
 			temp |= b
 
-		# data[31:30] = stack id
 		# data[29:26] = header = 0xF
 		# data[25:22] = 4bit counter
-		# data[21:6] = 16bit temperature code
+		# data[21:20] = 2bit stack id
+		# data[19:6] = 14bit temperature code
 		# data[5:0] = 6bit ECC for counter+temperature part
 
 		ret['ecc'] = temp & 0x3f
-		ret['temp_code'] = (temp >> 6) & 0xffff
+		ret['temp_code'] = (temp >> 6) & 0x3fff
+		ret['stack_id'] = (temp >> 20) & 0x3
 		ret['counter'] = (temp >> 22) & 0xf
 		ret['header'] = (temp >> 26) & 0xf
-		ret['stack_id'] = (temp >> 30) & 0x3
 
-		ret['computed_ecc'] = self.ecc(ret['counter'] << 16 | ret['temp_code'])
+
+		ret['computed_ecc'] = self.ecc(ret['counter'] << 16 | ret['stack_id'] << 14 | ret['temp_code'])
 		ret['ecc_match'] = ret['computed_ecc'] == ret['ecc']
 
 		if ret['stack_id'] == 1:

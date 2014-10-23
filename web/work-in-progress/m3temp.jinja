@@ -1,0 +1,209 @@
+{#Name: M3 Temperature Sensor #}
+{#Desc: Real-time temperature data from smart dust.#}
+
+
+{% extends "base_intro.jinja" %}
+
+
+{% block includes %}
+<script src="js/jquery.flot.custom-0.8.2.js"></script>
+<script src="bower_components/flot/jquery.flot.time.js"></script>
+<script src="js/jquery.grapher.js"></script>
+<script src="js/gatd_graph.js"></script>
+
+<link href="css/gatd_graph.css" media="all" rel="stylesheet" type="text/css" />
+{% endblock %}
+
+{% block title %}
+M3 Temperature Sensor
+{% endblock %}
+
+{% block page_title %}
+Michigan Micro Mote
+{% endblock %}
+
+{% block tagline %}
+Temperature Sensor
+{% endblock %}
+
+{% block information %}
+<p>
+</p>
+{% endblock %}
+
+{% block content %}
+
+<style>
+.raw_stats_div {
+	width: 70%;
+	margin: 30px auto;
+}
+.raw {
+	width: 75%;
+	margin: 30px auto;
+	float: left;
+}
+.stats{
+	width: 20%;
+	margin: 30px auto;
+	float: right;
+}
+
+#raw_table {
+	width: 100%;
+}
+#raw_table th {
+	font-weight: bold;
+	text-align: left;
+}
+#raw_table td, #raw_table th {
+	padding: 0px 5px 0px 5px;
+	font-size: 9pt;
+}
+
+dl {
+	margin-bottom: 50px;
+}
+
+dl dt {
+	background: #5f9be3;
+	color: #fff;
+	float: left;
+	font-weight: bold;
+	margin-right: 10px;
+	padding: 5px;
+	width: 200px;
+}
+
+dl dd {
+	text-align: left;
+	margin: 2px 0;
+	padding: 5px 0;
+}
+</style>
+
+<div id="body">
+	<div>
+		<div id="graph" class="box_shadow graph"></div>
+	</div>
+	<div class="raw_stats_div">
+		<div id="raw" class="box_shadow raw">
+			<h3>Raw Packet Data</h3>
+			<table id="raw_table">
+				<thead><tr>
+						<th>Timestamp</th>
+						<th>Stack ID</th>
+						<th>Temp Code</th>
+						<th>Actual Temperature</th>
+						<th>Counter</th>
+						<th>Packet ECC</th>
+						<th>Computed ECC</th>
+						<th>ECC Match?</th>
+				</tr></thead>
+				<tbody id="raw_table_tbody"></tbody>
+			</table>
+		</div>
+		<div id="stats" class="box_shadow stats">
+			<h3>Stats</h3>
+			<dl>
+				<dt>Average Temperature</dt>
+				<dd id="avg_temp">...</dd>
+				<dt>ECC Error Rate</dt>
+				<dd id="ecc_err_rate">...</dd>
+			</dl>
+		</div>
+	</div>
+</div>
+
+<script>
+
+var CC_PID = 'N9NaoNAJzi';
+var socket_cc;
+var row_count = 0;
+var avg_temp = 0;
+var ecc_err_rate = 0;
+
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DateTimeFormat
+
+function add_to_raw (time, stack_id, temp_code, temperature, counter, ecc, computed_ecc, ecc_match, color) {
+	if (typeof temperature === 'undefined') temperature = "No Calibration Data";
+	time = new Date(time);
+	var options = {
+		hour: 'numeric', minute: 'numeric', second: 'numeric',
+		timeZoneName: 'short',
+	};
+	time = new Intl.DateTimeFormat('en-US', options).format(time);
+	$("#raw_table_tbody").prepend("<tr id=\"raw_row_"+row_count+"\">"
+			+"<td>"+time+"</td>"
+			+"<td>"+stack_id+"</td>"
+			+"<td>"+temp_code+"</td>"
+			+"<td class=\"data_temp\">"+temperature+"</td>"
+			+"<td>"+counter+"</td>"
+			+"<td>"+ecc+"</td>"
+			+"<td>"+computed_ecc+"</td>"
+			+"<td class=\"data_ecc_match\">"+ecc_match+"</td>"
+			+"</tr>");
+	if (row_count >= 20) {
+		$("#raw_row_"+(row_count-20)).remove();
+	}
+	row_count += 1;
+}
+
+function update_stats (data) {
+	var temp_sum = 0;
+	var temp_cnt = 0;
+	var ecc_sum = 0;
+	var ecc_cnt = 0;
+
+	$(".data_temp").each(function (index) {
+			var i = parseInt($(this).text());
+			if (!isNaN(i)) {
+				temp_sum += i;
+				temp_cnt += 1;
+			}
+	});
+	$(".data_ecc_match").each(function (index) {
+			if ($(this).text() == 'false') ecc_sum += 1;
+			ecc_cnt +=1;
+	});
+
+	var temp_avg = temp_sum / temp_cnt;
+	$("#avg_temp").text(temp_avg.toFixed(2));
+	var ecc_avg = ecc_sum / ecc_cnt;
+	$("#ecc_err_rate").text((ecc_avg*100).toFixed(1) + '%');
+}
+
+onload = function() {
+	socket_cc = io.connect('inductor.eecs.umich.edu:8082/stream');
+	socket_cc.on('connect', function (data) {
+		socket_cc.emit('query', {'profile_id': CC_PID,
+		                         'time': 300000}
+		              );
+	});
+
+	socket_cc.on('data', function (data) {
+		var color = get_color(data['stack_id'])
+		add_to_raw(
+			data['time'],
+			data['stack_id'],
+			data['temp_code'],
+			data['temperature'],
+			data['counter'],
+			data['ecc'],
+			data['computed_ecc'],
+			data['ecc_match'],
+			color);
+		update_stats(data);
+		add_to_graph(g, data['stack_id'], data['time'], data['counter'], color);
+		g.update('all');
+	});
+
+	g = $.grapher($("#graph"),
+		{legend: {show: false, conainer: $("#graph_raw")},
+		 xaxis:  {show:true, width:300000, mode: "time", tickFormatter:x_format},
+		 yaxis:  {min:0, label:"Temperature (Celcius) --- Actually Counter Value For Now", max:100},
+		 grid:   {margin: {top: 8, bottom: 20, left: 25, right: 25}},
+		});
+}
+</script>
+{% endblock %}

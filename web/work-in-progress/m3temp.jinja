@@ -182,7 +182,12 @@ function update_stats (data) {
 	});
 
 	var temp_avg = temp_sum / temp_cnt;
-	$("#avg_temp").html(temp_avg.toFixed(1)+" &deg;C");
+	if (isNaN(temp_avg)) {
+		// All samples had bad ecc
+		$("#avg_temp").text("---");
+	} else {
+		$("#avg_temp").html(temp_avg.toFixed(1)+" &deg;C");
+	}
 	var ecc_avg = ecc_sum / ecc_cnt;
 	$("#ecc_err_rate").text((ecc_avg*100).toFixed(1) + '%');
 }

@@ -121,6 +121,11 @@ class m3NearfieldParser (parser.parser):
 		ret['computed_ecc'] = self.ecc(ret['counter'] << 16 | ret['temp_code'])
 		ret['ecc_match'] = ret['computed_ecc'] == ret['ecc']
 
+		if ret['stack_id'] == 1:
+			ret['temperature'] = (ret['temp_code'] - 538.54)/2.6667
+		elif ret['stack_id'] == 2:
+			ret['temperature'] = (ret['temp_code'] - 501.46)/2.9381
+
 		ret['sample'] = temp
 		ret['time']   = meta['time']
 

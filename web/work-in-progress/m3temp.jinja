@@ -73,6 +73,7 @@ dl dt {
 	margin-right: 10px;
 	padding: 5px;
 	width: 200px;
+	text-align: right;
 }
 
 dl dd {
@@ -89,6 +90,7 @@ dl dd {
 	<div class="raw_stats_div">
 		<div id="raw" class="box_shadow raw">
 			<h3>Raw Packet Data</h3>
+			<hr />
 			<table id="raw_table">
 				<thead><tr>
 						<th>Timestamp</th>
@@ -104,7 +106,8 @@ dl dd {
 			</table>
 		</div>
 		<div id="stats" class="box_shadow stats">
-			<h3>Stats</h3>
+			<h3>Statistics</h3>
+			<hr />
 			<dl>
 				<dt>Average Temperature</dt>
 				<dd id="avg_temp">...</dd>
@@ -168,7 +171,7 @@ function update_stats (data) {
 	});
 
 	var temp_avg = temp_sum / temp_cnt;
-	$("#avg_temp").text(temp_avg.toFixed(2));
+	$("#avg_temp").html(temp_avg.toFixed(1)+" &deg;C");
 	var ecc_avg = ecc_sum / ecc_cnt;
 	$("#ecc_err_rate").text((ecc_avg*100).toFixed(1) + '%');
 }

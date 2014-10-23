@@ -60,6 +60,9 @@ Temperature Sensor
 	padding: 0px 5px 0px 5px;
 	font-size: 9pt;
 }
+.bad_ecc td {
+	color: grey;
+}
 
 dl {
 	margin-bottom: 50px;
@@ -129,7 +132,11 @@ var ecc_err_rate = 0;
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DateTimeFormat
 
 function add_to_raw (time, stack_id, temp_code, temperature, counter, ecc, computed_ecc, ecc_match, color) {
-	if (typeof temperature === 'undefined') temperature = "No Calibration Data";
+	if (typeof temperature === 'undefined') {
+		temperature = "No Calibration Data";
+	} else {
+		temperature = temperature.toFixed(1);
+	}
 	time = new Date(time);
 	var options = {
 		hour: 'numeric', minute: 'numeric', second: 'numeric',
@@ -146,6 +153,10 @@ function add_to_raw (time, stack_id, temp_code, temperature, counter, ecc, compu
 			+"<td>"+computed_ecc+"</td>"
 			+"<td class=\"data_ecc_match\">"+ecc_match+"</td>"
 			+"</tr>");
+	if (!ecc_match) {
+		$("#raw_row_"+row_count).addClass("bad_ecc");
+		console.log("added class");
+	}
 	if (row_count >= 20) {
 		$("#raw_row_"+(row_count-20)).remove();
 	}
@@ -160,10 +171,10 @@ function update_stats (data) {
 
 	$(".data_temp").each(function (index) {
 			var i = parseInt($(this).text());
-			if (!isNaN(i)) {
-				temp_sum += i;
-				temp_cnt += 1;
-			}
+			if (isNaN(i)) return;
+			if ($(this).parent().hasClass("bad_ecc")) return;
+			temp_sum += i;
+			temp_cnt += 1;
 	});
 	$(".data_ecc_match").each(function (index) {
 			if ($(this).text() == 'false') ecc_sum += 1;
@@ -180,31 +191,39 @@ onload = function() {
 	socket_cc = io.connect('inductor.eecs.umich.edu:8082/stream');
 	socket_cc.on('connect', function (data) {
 		socket_cc.emit('query', {'profile_id': CC_PID,
-		                         'time': 300000}
+		                         'time': 600000}
 		              );
 	});
 
 	socket_cc.on('data', function (data) {
-		var color = get_color(data['stack_id'])
-		add_to_raw(
-			data['time'],
-			data['stack_id'],
-			data['temp_code'],
-			data['temperature'],
-			data['counter'],
-			data['ecc'],
-			data['computed_ecc'],
-			data['ecc_match'],
-			color);
-		update_stats(data);
-		add_to_graph(g, data['stack_id'], data['time'], data['counter'], color);
-		g.update('all');
+			if (! ((data['stack_id'] == 1) || (data['stack_id'] == 2)) ) {
+			console.log("Dropping packet with stack_id " + data['stack_id'] + ". " + data);
+			return;
+			}
+
+			var color = get_color(data['stack_id'])
+			add_to_raw(
+					data['time'],
+					data['stack_id'],
+					data['temp_code'],
+					data['temperature'],
+					data['counter'],
+					data['ecc'],
+					data['computed_ecc'],
+					data['ecc_match'],
+					color);
+			update_stats(data);
+
+			if (data['ecc_match']) {
+				add_to_graph(g, data['stack_id'], data['time'], data['temperature'], color);
+				g.update('all');
+			}
 	});
 
 	g = $.grapher($("#graph"),
 		{legend: {show: false, conainer: $("#graph_raw")},
-		 xaxis:  {show:true, width:300000, mode: "time", tickFormatter:x_format},
-		 yaxis:  {min:0, label:"Temperature (Celcius) --- Actually Counter Value For Now", max:100},
+		 xaxis:  {show:true, width:600000, mode: "time", tickFormatter:x_format},
+		 yaxis:  {min:0, label:"Temperature (Celcius)", max:60},
 		 grid:   {margin: {top: 8, bottom: 20, left: 25, right: 25}},
 		});
 }

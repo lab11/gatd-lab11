@@ -47,7 +47,7 @@ def build_site():
 		loader=jinja.FileSystemLoader(['.', 'templates']))
 
 	BUILT_DIR = 'built'
-	DIRECTORIES = ('demos', 'work-in-progress', 'raw', '.')
+	DIRECTORIES = ('demos', 'work-in-progress', 'raw', 'retired', '.')
 
 	try:
 		WORKING_DIR = tempfile.mkdtemp()

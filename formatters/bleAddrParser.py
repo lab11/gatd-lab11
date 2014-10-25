@@ -37,7 +37,27 @@ class bleAddrParser ():
                 'c5:61:7c:78:9f:43': 'Silverclaw',
                 'e5:e0:40:df:65:11': 'Supergirl',
                 'd3:cb:0f:50:ee:32': 'Chuck Norris',
-                'eb:b2:3f:cb:dc:27': 'Black Cat'
+                'eb:b2:3f:cb:dc:27': 'Black Cat',
+                'd2:a1:1a:3a:60:d4': 'Spiderman',
+                'ca:ba:56:5c:f0:fe': 'Moloch',
+                'e2:97:bd:07:e8:e4': 'Osiris',
+                'e1:59:1e:f2:24:aa': 'Spectre',
+                'd9:79:95:5d:18:dd': 'Hellstorm',
+                'c6:2d:d3:02:11:3f': 'Silver Surfer',
+                'cd:4e:73:c5:5e:63': 'Swamp Thing',
+                'd3:3a:15:17:10:74': 'Spyke',
+                'd4:be:a0:2d:f0:fb': 'Trickster',
+                'dc:e7:4c:53:25:72': 'Vagabond',
+                'ed:bc:ed:14:6b:bf': 'Punisher',
+                'f7:4b:c5:80:56:eb': 'Pyro',
+                'f9:f5:6b:43:4c:5f': 'Chameleon',
+                'fe:9d:c1:f3:1f:8a': 'Spawn',
+                'ce:bd:be:59:4b:59': 'Anti-Monitor',
+                'de:76:80:67:c3:6a': 'Nite Owl',
+                'e2:58:37:c0:50:73': 'Hyperion',
+                'd1:07:e5:3f:0c:be': 'Agent Zero',
+                'c4:ef:7d:19:3f:4b': 'Vindicator',
+                'ea:f8:b0:c7:06:41': 'Bizarro'
                 }
 
 	def __init__ (self):

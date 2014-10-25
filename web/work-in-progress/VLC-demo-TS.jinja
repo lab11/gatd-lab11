@@ -5,6 +5,7 @@
 
 {% block includes %}
 <script src="/js/gatd_canvas.js"></script>
+<script src="/js/gatd_graph.js"></script> {# for get_color #}
 {% endblock %}
 
 {% block title %}
@@ -293,7 +294,7 @@ VLC Location
 	draw_background_yz();
 	draw_background_xy();
 
-	function draw_loc_yz(yz_ctx, loc, rot, age) {
+	function draw_loc_yz(yz_ctx, loc, rot, age, color) {
 		var x = ((loc[0] / 2.54) * PX_SCALE) + WIDTH/2
 		var y = ((loc[1] / 2.54) * PX_SCALE) + HEIGHT/2
 		var z = ((loc[2] / 2.54) * PX_SCALE)
@@ -301,22 +302,14 @@ VLC Location
 		yz_ctx.arc(x, HEIGHT-z, 5, 0, 2 * Math.PI, false);
 
 		yz_ctx.globalAlpha = Math.max(0, 1-(age / age_out));
-		yz_ctx.fillStyle = '#faa';
-		yz_ctx.strokeStyle = '#f44' //"#f66";
+		yz_ctx.fillStyle = color; //'#faa';
+		yz_ctx.strokeStyle = color; //'#f44' //"#f66";
 		yz_ctx.fill();
 		yz_ctx.lineWidth = 2;
 		yz_ctx.stroke();
-
-		/* No orientation for yz
-		yz_ctx.strokeStyle = '#00f' //"#f66";
-		yz_ctx.lineWidth = 1.5;
-		var z_rot = rot[0][2] * 30;
-		var y_rot = -rot[0][1] * 30;
-		draw_arrow(yz_ctx, [z,y], [z+z_rot, y+y_rot]);
-		*/
 	}
 
-	function draw_loc_xy(xy_ctx, loc, rot, age) {
+	function draw_loc_xy(xy_ctx, loc, rot, age, color) {
 		var x = tx((loc[0] / 2.54) * PX_SCALE)
 		var y = ty((loc[1] / 2.54) * PX_SCALE)
 		var z = loc[2];
@@ -326,13 +319,13 @@ VLC Location
 
 		xy_ctx.globalAlpha = Math.max(0, 1-(age / age_out));
 		//console.log("alpha: " + xy_ctx.globalAlpha);
-		xy_ctx.fillStyle = '#faa';
-		xy_ctx.strokeStyle = '#f44' //"#f66";
+		xy_ctx.fillStyle = color; //'#faa';
+		xy_ctx.strokeStyle = color; //'#f44' //"#f66";
 		xy_ctx.fill();
 		xy_ctx.lineWidth = 2;
 		xy_ctx.stroke();
 
-		xy_ctx.strokeStyle = '#00f' //"#f66";
+		xy_ctx.strokeStyle = color; //'#00f' //"#f66";
 		xy_ctx.lineWidth = 1.5;
 		//xy_ctx.beginPath();
 		//xy_ctx.moveTo(x, y)
@@ -346,9 +339,9 @@ VLC Location
 		draw_arrow(xy_ctx, [x,y], [x+x_rot, y+y_rot]);
 	}
 
-	function draw_loc(yz_ctx, xy_ctx, loc, rot, age) {
-		draw_loc_yz(yz_ctx, loc, rot, age);
-		draw_loc_xy(xy_ctx, loc, rot, age);
+	function draw_loc(yz_ctx, xy_ctx, loc, rot, age, color) {
+		draw_loc_yz(yz_ctx, loc, rot, age, color);
+		draw_loc_xy(xy_ctx, loc, rot, age, color);
 	}
 
 	function draw_all_locs() {
@@ -369,7 +362,8 @@ VLC Location
 			var loc = loc_hist[i]['rx_location'];
 			var rot = loc_hist[i]['rx_rotation'];
 			var age = Math.max(1, Date.now() - loc_hist[i]['display_rx_time']);
-			draw_loc(dots_ctx_yz, dots_ctx_xy, loc, rot, age);
+			var color = get_color(loc_hist[i]['phone_ip']);
+			draw_loc(dots_ctx_yz, dots_ctx_xy, loc, rot, age, color);
 		}
 	}
 

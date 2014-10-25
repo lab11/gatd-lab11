@@ -1,10 +1,11 @@
-{#Name: VLC Floor Demo#}
-{#Desc: Real-time localization using visible light on a floor testbed. Demo for Mobicom'14, VLCS'14, and Terraswarm '14.#}
+{#Name: VLC Terraswarm Demo#}
+{#Desc: Real-time localization and room reservation using visible light on a floor testbed. Demo for Terraswarm'14.#}
 
 {% extends "base.jinja" %}
 
 {% block includes %}
 <script src="/js/gatd_canvas.js"></script>
+<script src="/js/gatd_graph.js"></script> {# for get_color #}
 {% endblock %}
 
 {% block title %}
@@ -16,40 +17,82 @@ VLC Location
 {% endblock %}
 
 {% block body %}
+<style>
+.room {
+	text-align: center;
+}
+</style>
 	<div id="body">
 		<div>
-			<canvas id="grid_canvas_yz" width="720" height="720"
-				style="z-index: 1; position:absolute; top:70px; right: 750; left: 0; margin-right: auto; margin-left: auto;"></canvas>
-			<canvas id="dots_canvas_yz" width="720" height="720"
-				style="z-index: 2; position:absolute; top:70px; right: 750; left: 0; margin-right: auto; margin-left: auto;"></canvas>
-			<canvas id="grid_canvas_xy" width="720" height="720"
-				style="z-index: 1; position:absolute; top:70px; right: 0; left: 750; margin-right: auto; margin-left: auto;"></canvas>
-			<canvas id="dots_canvas_xy" width="720" height="720"
-				style="z-index: 2; position:absolute; top:70px; right: 0; left: 750; margin-right: auto; margin-left: auto;"></canvas>
+			<canvas id="grid_canvas_yz" width="768" height="768"
+				style="z-index: 1; position:absolute; top:70px; right: 800; left: 0; margin-right: auto; margin-left: auto;"></canvas>
+			<canvas id="dots_canvas_yz" width="768" height="768"
+				style="z-index: 2; position:absolute; top:70px; right: 800; left: 0; margin-right: auto; margin-left: auto;"></canvas>
+			<canvas id="grid_canvas_xy" width="768" height="768"
+				style="z-index: 1; position:absolute; top:70px; right: 0; left: 800; margin-right: auto; margin-left: auto;"></canvas>
+			<canvas id="dots_canvas_xy" width="768" height="768"
+				style="z-index: 2; position:absolute; top:70px; right: 0; left: 800; margin-right: auto; margin-left: auto;"></canvas>
 		</div>
-		<!--
-		<div id="key" class="box_shadow key">
-			<table id="key_table">
-				<thead><tr>
-						<th>Index</th>
-						<th>ID</th>
-						<th>Description</th>
-						<th>Location</th>
-						<th>Time</th>
-				</tr></thead>
-				<tbody id="key_table_tbody"></tbody>
-			</table>
+		<div style="z-index: 3; position: absolute; top:70px; right: 800; left: 0; margin-right: auto; margin-left: auto; width: 768; height: 192; background-color: white;">
+			<div style="width: 65%; float: left">
+				<table class="table">
+					<tr>
+						<th class="room">Room</th>
+						<th>Current Occupants</th>
+						<th>Available</th>
+					</tr>
+					<tr>
+						<td class="room">1</td>
+						<td>Mr. Yellow, Anonymous</td>
+						<td>No</td>
+					</tr>
+					<tr>
+						<td class="room">2</td>
+						<td></td>
+						<td>Yes</td>
+					</tr>
+					<tr>
+						<td class="room">3</td>
+						<td></td>
+						<td>Yes</td>
+					</tr>
+					<tr>
+						<td class="room">4</td>
+						<td>Mr. White</td>
+						<td>Maybe</td>
+					</tr>
+				</table>
+			</div>
+			<div style="width: 30%; float: right">
+				<table class="table">
+					<tr>
+						<th>User</th>
+						<th>Last Seen</th>
+					</tr>
+					<tr>
+						<td>Mr. Yellow</td>
+						<td>10:14 in Room 1</td>
+					</tr>
+					<tr>
+						<td>Mr. White</td>
+						<td>10:15 in Room 4</td>
+					</tr>
+					<tr>
+						<td>Mr. Black</td>
+						<td>9:47 in Room 2</td>
+					</tr>
+				</table>
+			</div>
 		</div>
-		-->
 	</div>
 
 	<script>
 	var LOC_VLC_PID = 'WEgwAGyc9N';
 	var socket_loc;
 
-	var PX_SCALE = 10;
-	var WIDTH    = 72 * PX_SCALE;
-	var HEIGHT   = 72 * PX_SCALE;
+	var PX_SCALE = 8;
+	var WIDTH    = 96 * PX_SCALE;
+	var HEIGHT   = 96 * PX_SCALE;
 
 	var grid_canvas_yz = document.getElementById('grid_canvas_yz');
 	var dots_canvas_yz = document.getElementById('dots_canvas_yz');
@@ -107,10 +150,10 @@ VLC Location
 
 		// Draw 1' grid (masking tape lines)
 		context.strokeStyle = "#000";
-		for (r in _.range(1, 6)) {
+		for (r in _.range(0, 5)) {
 			r = parseInt(r);
-			i = (r+1)*12*PX_SCALE;
-			draw_line(context, [0, i], [2*PX_SCALE, i]);
+			i = (r+2)*12*PX_SCALE;
+			draw_line(context, [i, HEIGHT], [i, HEIGHT-2*PX_SCALE]);
 		}
 
 		// Draw 1' height markers
@@ -118,14 +161,14 @@ VLC Location
 		context.font = "bold 11px sans-serif";
 		context.strokeStyle = "#444";
 		context.setLineDash([PX_SCALE/2])
-		for (r in _.range(1, 7)) {
+		for (r in _.range(1, 8)) {
 			r = parseInt(r);
 			i = (r+1)*12*PX_SCALE;
-			draw_line(context, [i, 0], [i, HEIGHT]);
-			if ((r+1) == 1) {
-				context.fillText((r+1) + ' foot', i+PX_SCALE, PX_SCALE);
+			draw_line(context, [0, i], [HEIGHT, i]);
+			if ((6-r+1) == 1) {
+				context.fillText((6-r+1) + ' foot', PX_SCALE, i-PX_SCALE);
 			} else {
-				context.fillText((r+1) + ' feet', i+PX_SCALE, PX_SCALE);
+				context.fillText((6-r+1) + ' feet', PX_SCALE, i-PX_SCALE);
 			}
 		}
 		context.setLineDash([0])
@@ -138,9 +181,9 @@ VLC Location
 
 		draw_arrow(context, [PX_SCALE*1, HEIGHT-PX_SCALE*1], [PX_SCALE*4, HEIGHT-PX_SCALE*1]);
 		draw_arrow(context, [PX_SCALE*1, HEIGHT-PX_SCALE*1], [PX_SCALE*1, HEIGHT-PX_SCALE*4]);
-		context.fillText('+z', PX_SCALE*5, HEIGHT-PX_SCALE*1);
+		context.fillText('+x', PX_SCALE*5, HEIGHT-PX_SCALE*1);
 		context.textAlign = 'center';
-		context.fillText('+y', PX_SCALE*1, HEIGHT-PX_SCALE*5.5);
+		context.fillText('+z', PX_SCALE*1, HEIGHT-PX_SCALE*5.5);
 		context.textAlign = 'left';
 
 		// Draw 1" scale marker
@@ -174,15 +217,23 @@ VLC Location
 		context.strokeStyle = "#00f";
 
 		context.beginPath();
-		context.arc(0, ty(-13.5*PX_SCALE), 14, 0, 2 * Math.PI, false);
+		context.arc(tx(-2*PX_SCALE), HEIGHT+5, 15, 0, 2 * Math.PI, false);
 		context.stroke();
 
 		context.beginPath();
-		context.arc(0, ty(11.25*PX_SCALE), 14, 0, 2 * Math.PI, false);
+		context.arc(tx(-13.25*PX_SCALE), HEIGHT+5, 15, 0, 2 * Math.PI, false);
 		context.stroke();
 
 		context.beginPath();
-		context.arc(0, ty(13.5*PX_SCALE), 14, 0, 2 * Math.PI, false);
+		context.arc(tx(13*PX_SCALE), HEIGHT+5, 15, 0, 2 * Math.PI, false);
+		context.stroke();
+
+		context.beginPath();
+		context.arc(tx(-12.75*PX_SCALE), HEIGHT+5, 15, 0, 2 * Math.PI, false);
+		context.stroke();
+
+		context.beginPath();
+		context.arc(tx(11.25*PX_SCALE), HEIGHT+5, 15, 0, 2 * Math.PI, false);
 		context.stroke();
 	}
 
@@ -212,11 +263,11 @@ VLC Location
 
 		// Draw 1' grid (masking tape lines)
 		context.strokeStyle = "#000";
-		for (r in _.range(1, 6)) {
+		for (r in _.range(0, 5)) {
 			r = parseInt(r);
-			i = (r+1)*12*PX_SCALE;
-			draw_line(context, [1*12*PX_SCALE, i], [5*12*PX_SCALE, i]);
-			draw_line(context, [i, 1*12*PX_SCALE], [i, 5*12*PX_SCALE]);
+			i = (r+2)*12*PX_SCALE;
+			draw_line(context, [2*12*PX_SCALE, i], [6*12*PX_SCALE, i]);
+			draw_line(context, [i, 2*12*PX_SCALE], [i, 6*12*PX_SCALE]);
 		}
 
 		// Draw orientation marker
@@ -280,34 +331,44 @@ VLC Location
 		context.beginPath();
 		context.arc(tx(11.25*PX_SCALE), ty(-13.5*PX_SCALE), 15, 0, 2 * Math.PI, false);
 		context.stroke();
+
+
+		// Draw room labels
+		var orig_font = context.font;
+		context.font = "bold 40px sans-serif";
+		context.fillStyle = '#555';
+		context.fillText('Room 1', PX_SCALE*6, PX_SCALE*6);
+		context.fillText('Room 2', WIDTH-PX_SCALE*24, PX_SCALE*6);
+		context.fillText('Room 3', WIDTH-PX_SCALE*24, HEIGHT-PX_SCALE*6);
+		context.fillText('Room 4', PX_SCALE*6, HEIGHT-PX_SCALE*6);
+		context.font = orig_font;
+
+		context.strokeStyle = "#555";
+		context.setLineDash([5]);
+		context.lineWidth = 3;
+		draw_line(context, [0, HEIGHT/2], [WIDTH, HEIGHT/2]);
+		draw_line(context, [WIDTH/2, 0], [WIDTH/2, HEIGHT]);
 	}
 
 	draw_background_yz();
 	draw_background_xy();
 
-	function draw_loc_yz(yz_ctx, loc, rot, age) {
+	function draw_loc_yz(yz_ctx, loc, rot, age, color) {
+		var x = ((loc[0] / 2.54) * PX_SCALE) + WIDTH/2
 		var y = ((loc[1] / 2.54) * PX_SCALE) + HEIGHT/2
 		var z = ((loc[2] / 2.54) * PX_SCALE)
 		yz_ctx.beginPath();
-		yz_ctx.arc(z, y, 5, 0, 2 * Math.PI, false);
+		yz_ctx.arc(x, HEIGHT-z, 5, 0, 2 * Math.PI, false);
 
 		yz_ctx.globalAlpha = Math.max(0, 1-(age / age_out));
-		yz_ctx.fillStyle = '#faa';
-		yz_ctx.strokeStyle = '#f44' //"#f66";
+		yz_ctx.fillStyle = color; //'#faa';
+		yz_ctx.strokeStyle = color; //'#f44' //"#f66";
 		yz_ctx.fill();
 		yz_ctx.lineWidth = 2;
 		yz_ctx.stroke();
-
-		/* No orientation for yz
-		yz_ctx.strokeStyle = '#00f' //"#f66";
-		yz_ctx.lineWidth = 1.5;
-		var z_rot = rot[0][2] * 30;
-		var y_rot = -rot[0][1] * 30;
-		draw_arrow(yz_ctx, [z,y], [z+z_rot, y+y_rot]);
-		*/
 	}
 
-	function draw_loc_xy(xy_ctx, loc, rot, age) {
+	function draw_loc_xy(xy_ctx, loc, rot, age, color) {
 		var x = tx((loc[0] / 2.54) * PX_SCALE)
 		var y = ty((loc[1] / 2.54) * PX_SCALE)
 		var z = loc[2];
@@ -317,13 +378,13 @@ VLC Location
 
 		xy_ctx.globalAlpha = Math.max(0, 1-(age / age_out));
 		//console.log("alpha: " + xy_ctx.globalAlpha);
-		xy_ctx.fillStyle = '#faa';
-		xy_ctx.strokeStyle = '#f44' //"#f66";
+		xy_ctx.fillStyle = color; //'#faa';
+		xy_ctx.strokeStyle = color; //'#f44' //"#f66";
 		xy_ctx.fill();
 		xy_ctx.lineWidth = 2;
 		xy_ctx.stroke();
 
-		xy_ctx.strokeStyle = '#00f' //"#f66";
+		xy_ctx.strokeStyle = color; //'#00f' //"#f66";
 		xy_ctx.lineWidth = 1.5;
 		//xy_ctx.beginPath();
 		//xy_ctx.moveTo(x, y)
@@ -337,9 +398,9 @@ VLC Location
 		draw_arrow(xy_ctx, [x,y], [x+x_rot, y+y_rot]);
 	}
 
-	function draw_loc(yz_ctx, xy_ctx, loc, rot, age) {
-		draw_loc_yz(yz_ctx, loc, rot, age);
-		draw_loc_xy(xy_ctx, loc, rot, age);
+	function draw_loc(yz_ctx, xy_ctx, loc, rot, age, color) {
+		draw_loc_yz(yz_ctx, loc, rot, age, color);
+		draw_loc_xy(xy_ctx, loc, rot, age, color);
 	}
 
 	function draw_all_locs() {
@@ -352,7 +413,7 @@ VLC Location
 		if (loc_hist.length == 0) return;
 
 		while ((loc_hist[0]['display_rx_time'] + age_out) < Date.now()) {
-			console.log('Aged out entry (now: ' + Date.now() + ' disp_rx_time: ' + loc_hist[0]['display_rx_time'] + ')');
+			//console.log('Aged out entry (now: ' + Date.now() + ' disp_rx_time: ' + loc_hist[0]['display_rx_time'] + ')');
 			loc_hist.shift();
 			if (loc_hist.length == 0) return;
 		}
@@ -360,7 +421,8 @@ VLC Location
 			var loc = loc_hist[i]['rx_location'];
 			var rot = loc_hist[i]['rx_rotation'];
 			var age = Math.max(1, Date.now() - loc_hist[i]['display_rx_time']);
-			draw_loc(dots_ctx_yz, dots_ctx_xy, loc, rot, age);
+			var color = get_color(loc_hist[i]['phone_ip']);
+			draw_loc(dots_ctx_yz, dots_ctx_xy, loc, rot, age, color);
 		}
 	}
 
@@ -374,7 +436,7 @@ VLC Location
 
 		socket_loc.on('data', function (data) {
 			data['display_rx_time'] = Date.now();
-			console.log(data);
+			//console.log(data);
 			loc_hist.push(data);
 		});
 	}

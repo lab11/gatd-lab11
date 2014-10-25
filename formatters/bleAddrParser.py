@@ -13,6 +13,9 @@ class bleAddrParser ():
 
         superhero_mapping = {
                 #'ble address': 'a superhero name'
+                'c8:5d:e7:42:97:8f': 'TestNode1',
+                'c4:16:5d:79:de:3e': 'TestNode2',
+                'ed:59:3a:a4:57:0a': 'TestNode3'
                 }
 
 	def __init__ (self):
@@ -33,7 +36,8 @@ class bleAddrParser ():
 
                 # add in a superhero identity
                 if 'ble_addr' in ret and ret['ble_addr'] in self.superhero_mapping:
-                    ret['identity'] = self.superhero_mapping[ret['ble_addr']]
+                    ret['uniqname'] = self.superhero_mapping[ret['ble_addr']]
+                    ret['full_name'] = self.superhero_mapping[ret['ble_addr']]
 
             # add meta data to the dict
             ret['address'] = str(meta['addr'])

@@ -1,6 +1,6 @@
 import parser
 
-class wearaboutseParser (parser.parser):
+class wearaboutsParser (parser.parser):
 
     # identifies people and their locations
     name = 'wearabouts'

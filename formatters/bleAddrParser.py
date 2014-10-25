@@ -8,8 +8,8 @@ class bleAddrParser ():
 
         scanner_mapping = {
                 #'mac address': 'some location in Berkeley'
-                '1C:BA:8C:ED:ED:2A': 'test',
-                '00:0C:29:73:8A:3C': 'tucker'
+                '1C:BA:8C:ED:ED:2A': ('test',   0)
+                '00:0C:29:73:8A:3C': ('tucker', 1)
                 }
 
         superhero_mapping = {
@@ -72,9 +72,11 @@ class bleAddrParser ():
                 if 'bbb_mac_addr' in ret and ret['bbb_mac_addr'] in self.scanner_mapping:
                     ret['location_str'] = (
                         'USA|California|Berkeley|UCB|Clark Kerr|Conference Center|' +
-                        self.scanner_mapping[ret['bbb_mac_addr']])
+                        self.scanner_mapping[ret['bbb_mac_addr']][0])
+                    ret['location_id'] =  self.scanner_mapping[ret['bbb_mac_addr']][1]
                 else:
                     ret['location_str'] = 'unknown'
+                    ret['location_id'] = -1
 
                 # add in a superhero identity
                 if 'ble_addr' in ret and ret['ble_addr'] in self.superhero_mapping:

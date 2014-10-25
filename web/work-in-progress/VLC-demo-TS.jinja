@@ -17,6 +17,11 @@ VLC Location
 {% endblock %}
 
 {% block body %}
+<style>
+.room {
+	text-align: center;
+}
+</style>
 	<div id="body">
 		<div>
 			<canvas id="grid_canvas_yz" width="768" height="768"
@@ -28,20 +33,57 @@ VLC Location
 			<canvas id="dots_canvas_xy" width="768" height="768"
 				style="z-index: 2; position:absolute; top:70px; right: 0; left: 800; margin-right: auto; margin-left: auto;"></canvas>
 		</div>
-		<!--
-		<div id="key" class="box_shadow key">
-			<table id="key_table">
-				<thead><tr>
-						<th>Index</th>
-						<th>ID</th>
-						<th>Description</th>
-						<th>Location</th>
-						<th>Time</th>
-				</tr></thead>
-				<tbody id="key_table_tbody"></tbody>
-			</table>
+		<div style="z-index: 3; position: absolute; top:70px; right: 800; left: 0; margin-right: auto; margin-left: auto; width: 768; height: 192; background-color: white;">
+			<div style="width: 65%; float: left">
+				<table class="table">
+					<tr>
+						<th class="room">Room</th>
+						<th>Current Occupants</th>
+						<th>Available</th>
+					</tr>
+					<tr>
+						<td class="room">1</td>
+						<td>Mr. Yellow, Anonymous</td>
+						<td>No</td>
+					</tr>
+					<tr>
+						<td class="room">2</td>
+						<td></td>
+						<td>Yes</td>
+					</tr>
+					<tr>
+						<td class="room">3</td>
+						<td></td>
+						<td>Yes</td>
+					</tr>
+					<tr>
+						<td class="room">4</td>
+						<td>Mr. White</td>
+						<td>Maybe</td>
+					</tr>
+				</table>
+			</div>
+			<div style="width: 30%; float: right">
+				<table class="table">
+					<tr>
+						<th>User</th>
+						<th>Last Seen</th>
+					</tr>
+					<tr>
+						<td>Mr. Yellow</td>
+						<td>10:14 in Room 1</td>
+					</tr>
+					<tr>
+						<td>Mr. White</td>
+						<td>10:15 in Room 4</td>
+					</tr>
+					<tr>
+						<td>Mr. Black</td>
+						<td>9:47 in Room 2</td>
+					</tr>
+				</table>
+			</div>
 		</div>
-		-->
 	</div>
 
 	<script>
@@ -289,6 +331,23 @@ VLC Location
 		context.beginPath();
 		context.arc(tx(11.25*PX_SCALE), ty(-13.5*PX_SCALE), 15, 0, 2 * Math.PI, false);
 		context.stroke();
+
+
+		// Draw room labels
+		var orig_font = context.font;
+		context.font = "bold 40px sans-serif";
+		context.fillStyle = '#555';
+		context.fillText('Room 1', PX_SCALE*6, PX_SCALE*6);
+		context.fillText('Room 2', WIDTH-PX_SCALE*24, PX_SCALE*6);
+		context.fillText('Room 3', WIDTH-PX_SCALE*24, HEIGHT-PX_SCALE*6);
+		context.fillText('Room 4', PX_SCALE*6, HEIGHT-PX_SCALE*6);
+		context.font = orig_font;
+
+		context.strokeStyle = "#555";
+		context.setLineDash([5]);
+		context.lineWidth = 3;
+		draw_line(context, [0, HEIGHT/2], [WIDTH, HEIGHT/2]);
+		draw_line(context, [WIDTH/2, 0], [WIDTH/2, HEIGHT]);
 	}
 
 	draw_background_yz();
@@ -354,7 +413,7 @@ VLC Location
 		if (loc_hist.length == 0) return;
 
 		while ((loc_hist[0]['display_rx_time'] + age_out) < Date.now()) {
-			console.log('Aged out entry (now: ' + Date.now() + ' disp_rx_time: ' + loc_hist[0]['display_rx_time'] + ')');
+			//console.log('Aged out entry (now: ' + Date.now() + ' disp_rx_time: ' + loc_hist[0]['display_rx_time'] + ')');
 			loc_hist.shift();
 			if (loc_hist.length == 0) return;
 		}
@@ -377,7 +436,7 @@ VLC Location
 
 		socket_loc.on('data', function (data) {
 			data['display_rx_time'] = Date.now();
-			console.log(data);
+			//console.log(data);
 			loc_hist.push(data);
 		});
 	}

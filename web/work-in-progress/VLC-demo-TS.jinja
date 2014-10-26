@@ -34,16 +34,16 @@ VLC Location
 				style="z-index: 2; position:absolute; top:70px; right: 0; left: 800; margin-right: auto; margin-left: auto;"></canvas>
 		</div>
 		<div style="z-index: 3; position: absolute; top:70px; right: 800; left: 0; margin-right: auto; margin-left: auto; width: 768; height: 192; background-color: white;">
-			<div style="width: 65%; float: left">
+			<div style="width: 35%; float: left">
 				<table class="table">
 					<tr>
 						<th class="room">Room</th>
-						<th>Current Occupants</th>
+						<th>Occupants</th>
 						<th>Available</th>
 					</tr>
 					<tr>
 						<td class="room">1</td>
-						<td>Mr. Yellow, Anonymous</td>
+						<td></td>
 						<td>No</td>
 					</tr>
 					<tr>
@@ -58,28 +58,32 @@ VLC Location
 					</tr>
 					<tr>
 						<td class="room">4</td>
-						<td>Mr. White</td>
+						<td></td>
 						<td>Maybe</td>
 					</tr>
 				</table>
 			</div>
-			<div style="width: 30%; float: right">
+			<div style="width: 60%; float: right">
 				<table class="table">
 					<tr>
 						<th>User</th>
 						<th>Last Seen</th>
 					</tr>
 					<tr>
-						<td>Mr. Yellow</td>
-						<td>10:14 in Room 1</td>
-					</tr>
-					<tr>
-						<td>Mr. White</td>
+						<td><canvas id="user_white" width="30" height="16"></canvas>Mrs. White</td>
 						<td>10:15 in Room 4</td>
 					</tr>
 					<tr>
-						<td>Mr. Black</td>
+						<td><canvas id="user_yellow" width="30" height="16"></canvas>Colonel Mustard</td>
+						<td>10:14 in Room 1</td>
+					</tr>
+					<tr>
+						<td><canvas id="user_blue" width="30" height="16"></canvas>Mrs. Peacock</td>
 						<td>9:47 in Room 2</td>
+					</tr>
+					<tr>
+						<td><canvas id="user_anon" width="30" height="16"></canvas>Anonymous</td>
+						<td></td>
 					</tr>
 				</table>
 			</div>
@@ -350,10 +354,50 @@ VLC Location
 		draw_line(context, [WIDTH/2, 0], [WIDTH/2, HEIGHT]);
 	}
 
+	function draw_user_dots () {
+		console.log('draw_user_dots');
+		var canvas_yellow = document.getElementById('user_yellow');
+		var ctx_yellow = canvas_yellow.getContext('2d');
+		ctx_yellow.fillStyle = get_demo_fill_color('Colonel Mustard');
+		ctx_yellow.strokeStyle = get_demo_color('Colonel Mustard');
+		ctx_yellow.arc(10, 10, 5, 0, 2 * Math.PI, false);
+		ctx_yellow.fill();
+		ctx_yellow.lineWidth = 2;
+		ctx_yellow.stroke();
+
+		var canvas_white = document.getElementById('user_white');
+		var ctx_white = canvas_white.getContext('2d');
+		ctx_white.fillStyle = get_demo_fill_color('Mrs. White');
+		ctx_white.strokeStyle = get_demo_color('Mrs. White');
+		ctx_white.arc(10, 10, 5, 0, 2 * Math.PI, false);
+		ctx_white.fill();
+		ctx_white.lineWidth = 2;
+		ctx_white.stroke();
+
+		var canvas_blue = document.getElementById('user_blue');
+		var ctx_blue = canvas_blue.getContext('2d');
+		ctx_blue.fillStyle = get_demo_fill_color('Mrs. Peacock');
+		ctx_blue.strokeStyle = get_demo_color('Mrs. Peacock');
+		ctx_blue.arc(10, 10, 5, 0, 2 * Math.PI, false);
+		ctx_blue.fill();
+		ctx_blue.lineWidth = 2;
+		ctx_blue.stroke();
+
+		var canvas_anon = document.getElementById('user_anon');
+		var ctx_anon = canvas_anon.getContext('2d');
+		ctx_anon.fillStyle = get_demo_fill_color('Anonymous');
+		ctx_anon.strokeStyle = get_demo_color('Anonymous');
+		ctx_anon.arc(10, 10, 5, 0, 2 * Math.PI, false);
+		ctx_anon.fill();
+		ctx_anon.lineWidth = 2;
+		ctx_anon.stroke();
+	}
+
 	draw_background_yz();
 	draw_background_xy();
+	draw_user_dots();
 
-	function draw_loc_yz(yz_ctx, loc, rot, age, color) {
+	function draw_loc_yz(yz_ctx, loc, rot, age, user) {
 		var x = ((loc[0] / 2.54) * PX_SCALE) + WIDTH/2
 		var y = ((loc[1] / 2.54) * PX_SCALE) + HEIGHT/2
 		var z = ((loc[2] / 2.54) * PX_SCALE)
@@ -361,14 +405,14 @@ VLC Location
 		yz_ctx.arc(x, HEIGHT-z, 5, 0, 2 * Math.PI, false);
 
 		yz_ctx.globalAlpha = Math.max(0, 1-(age / age_out));
-		yz_ctx.fillStyle = color; //'#faa';
-		yz_ctx.strokeStyle = color; //'#f44' //"#f66";
+		yz_ctx.fillStyle = get_demo_fill_color(user); //'#faa';
+		yz_ctx.strokeStyle = get_demo_color(user); //'#f44' //"#f66";
 		yz_ctx.fill();
 		yz_ctx.lineWidth = 2;
 		yz_ctx.stroke();
 	}
 
-	function draw_loc_xy(xy_ctx, loc, rot, age, color) {
+	function draw_loc_xy(xy_ctx, loc, rot, age, user) {
 		var x = tx((loc[0] / 2.54) * PX_SCALE)
 		var y = ty((loc[1] / 2.54) * PX_SCALE)
 		var z = loc[2];
@@ -378,13 +422,13 @@ VLC Location
 
 		xy_ctx.globalAlpha = Math.max(0, 1-(age / age_out));
 		//console.log("alpha: " + xy_ctx.globalAlpha);
-		xy_ctx.fillStyle = color; //'#faa';
-		xy_ctx.strokeStyle = color; //'#f44' //"#f66";
+		xy_ctx.fillStyle = get_demo_fill_color(user); //'#faa';
+		xy_ctx.strokeStyle = get_demo_color(user); //'#f44' //"#f66";
 		xy_ctx.fill();
 		xy_ctx.lineWidth = 2;
 		xy_ctx.stroke();
 
-		xy_ctx.strokeStyle = color; //'#00f' //"#f66";
+		xy_ctx.strokeStyle = get_demo_color(user); //'#00f' //"#f66";
 		xy_ctx.lineWidth = 1.5;
 		//xy_ctx.beginPath();
 		//xy_ctx.moveTo(x, y)
@@ -398,9 +442,9 @@ VLC Location
 		draw_arrow(xy_ctx, [x,y], [x+x_rot, y+y_rot]);
 	}
 
-	function draw_loc(yz_ctx, xy_ctx, loc, rot, age, color) {
-		draw_loc_yz(yz_ctx, loc, rot, age, color);
-		draw_loc_xy(xy_ctx, loc, rot, age, color);
+	function draw_loc(yz_ctx, xy_ctx, loc, rot, age, user) {
+		draw_loc_yz(yz_ctx, loc, rot, age, user);
+		draw_loc_xy(xy_ctx, loc, rot, age, user);
 	}
 
 	function draw_all_locs() {
@@ -421,8 +465,37 @@ VLC Location
 			var loc = loc_hist[i]['rx_location'];
 			var rot = loc_hist[i]['rx_rotation'];
 			var age = Math.max(1, Date.now() - loc_hist[i]['display_rx_time']);
-			var color = get_color(loc_hist[i]['phone_ip']);
-			draw_loc(dots_ctx_yz, dots_ctx_xy, loc, rot, age, color);
+			draw_loc(dots_ctx_yz, dots_ctx_xy, loc, rot, age, loc_hist[i]['user']);
+		}
+	}
+
+	/* Wrapper around generic demo color-picker that picks off known names and
+		 special-cases them. If uses supply their own names, fall back to the
+		 automatic color selection */
+	function get_demo_color (user) {
+		if (user == "Mrs. White") {
+			return "#000";
+		} else if (user == "Colonel Mustard") {
+			return "#E6B800";
+		} else if (user == "Mrs. Peacock") {
+			return "#33CCFF";
+		} else if (user == "Anonymous") {
+			return "#33CC33";
+		} else {
+			return get_color(user);
+		}
+	}
+	function get_demo_fill_color (user) {
+		if (user == "Mrs. White") {
+			return "#fff";
+		} else if (user == "Colonel Mustard") {
+			return "#F5E399";
+		} else if (user == "Mrs. Peacock") {
+			return "#ADEBFF";
+		} else if (user == "Anonymous") {
+			return "#ADEBAD";
+		} else {
+			return get_color(user);
 		}
 	}
 
@@ -436,7 +509,7 @@ VLC Location
 
 		socket_loc.on('data', function (data) {
 			data['display_rx_time'] = Date.now();
-			//console.log(data);
+			console.log(data);
 			loc_hist.push(data);
 		});
 	}

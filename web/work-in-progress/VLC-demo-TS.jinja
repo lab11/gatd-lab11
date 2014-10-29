@@ -43,22 +43,22 @@ VLC Location
 					</tr>
 					<tr>
 						<td class="room">1</td>
-						<td></td>
+						<td><canvas id="occ_1" width="120" height="16"></canvas></td>
 						<td>No</td>
 					</tr>
 					<tr>
 						<td class="room">2</td>
-						<td></td>
+						<td><canvas id="occ_2" width="120" height="16"></canvas></td>
 						<td>Yes</td>
 					</tr>
 					<tr>
 						<td class="room">3</td>
-						<td></td>
+						<td><canvas id="occ_3" width="120" height="16"></canvas></td>
 						<td>Yes</td>
 					</tr>
 					<tr>
 						<td class="room">4</td>
-						<td></td>
+						<td><canvas id="occ_4" width="120" height="16"></canvas></td>
 						<td>Maybe</td>
 					</tr>
 				</table>
@@ -343,8 +343,8 @@ VLC Location
 		context.fillStyle = '#555';
 		context.fillText('Room 1', PX_SCALE*6, PX_SCALE*6);
 		context.fillText('Room 2', WIDTH-PX_SCALE*24, PX_SCALE*6);
-		context.fillText('Room 3', WIDTH-PX_SCALE*24, HEIGHT-PX_SCALE*6);
-		context.fillText('Room 4', PX_SCALE*6, HEIGHT-PX_SCALE*6);
+		context.fillText('Room 3', PX_SCALE*6, HEIGHT-PX_SCALE*6);
+		context.fillText('Room 4', WIDTH-PX_SCALE*24, HEIGHT-PX_SCALE*6);
 		context.font = orig_font;
 
 		context.strokeStyle = "#555";
@@ -454,6 +454,8 @@ VLC Location
 		var dots_ctx_xy = dots_canvas_xy.getContext('2d');
 		dots_ctx_xy.clearRect(0, 0, WIDTH, HEIGHT);
 
+		clear_occupants();
+
 		if (loc_hist.length == 0) return;
 
 		while ((loc_hist[0]['display_rx_time'] + age_out) < Date.now()) {
@@ -461,11 +463,24 @@ VLC Location
 			loc_hist.shift();
 			if (loc_hist.length == 0) return;
 		}
+
+		// Record the last seen place for all occupants here for room occupancy
+		var last_room = {};
+		var room_cnt = {1: 0, 2: 0, 3: 0, 4: 0};
+
 		for (var i=0; i < loc_hist.length; i++) {
 			var loc = loc_hist[i]['rx_location'];
 			var rot = loc_hist[i]['rx_rotation'];
 			var age = Math.max(1, Date.now() - loc_hist[i]['display_rx_time']);
 			draw_loc(dots_ctx_yz, dots_ctx_xy, loc, rot, age, loc_hist[i]['user']);
+
+			last_room[loc_hist[i]['phone_ip']] = loc_hist[i];
+		}
+
+		for (var phone_ip in last_room) {
+			var room = which_room(last_room[phone_ip]);
+			draw_occupant_dot('occ_' + room, room_cnt[room], last_room[phone_ip]['user']);
+			room_cnt[room] += 1;
 		}
 	}
 
@@ -505,16 +520,41 @@ VLC Location
 			if (data['rx_location'][1] > 0) {
 				return 2;
 			} else {
-				return 3;
+				return 4;
 			}
 		} else {
 			// left side
 			if (data['rx_location'][1] > 0) {
 				return 1;
 			} else {
-				return 4;
+				return 3;
 			}
 		}
+	}
+
+	function clear_occupants_from (room) {
+		var canvas = document.getElementById(room);
+		var ctx = canvas.getContext('2d');
+		ctx.clearRect(0, 0, 120, 16);
+	}
+
+	function clear_occupants () {
+		clear_occupants_from('occ_1');
+		clear_occupants_from('occ_2');
+		clear_occupants_from('occ_3');
+		clear_occupants_from('occ_4');
+	}
+
+	function draw_occupant_dot (room, cnt, user) {
+		var canvas = document.getElementById(room);
+		var ctx = canvas.getContext('2d');
+		ctx.fillStyle = get_demo_fill_color(user);
+		ctx.strokeStyle = get_demo_color(user);
+		ctx.beginPath();
+		ctx.arc(10+20*cnt, 10, 5, 0, 2 * Math.PI, false);
+		ctx.fill();
+		ctx.lineWidth = 2;
+		ctx.stroke();
 	}
 
 	var updater_interval = setInterval(function(){draw_all_locs()}, 500);
@@ -545,11 +585,6 @@ VLC Location
 			console.log(data);
 			loc_hist.push(data);
 		});
-	}
-
-	function on_grid_cb_click() {
-		draw_background_yz();
-		draw_background_xy();
 	}
 
 	</script>

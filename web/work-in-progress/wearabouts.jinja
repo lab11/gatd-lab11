@@ -683,8 +683,14 @@ function collide(node) {
         if (quad.point && (quad.point !== node)) {
             var x = node.x - quad.point.x,
                 y = node.y - quad.point.y,
-                l = Math.sqrt(x * x + y * y),
+                l = Math.sqrt(x * x + y * y)
+
+            var r = 0
+            try {
                 r = (node.text.getBBox().width+4 + quad.point.text.getBBox().width+4)/2;
+            } catch(err) {
+                r = 0;
+            }
             if (l < r) {
                 l = (l - r) / l * .5;
                 node.x -= x *= l;

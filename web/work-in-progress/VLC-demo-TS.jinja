@@ -570,6 +570,7 @@ VLC Location
 
 			var options = {
 				hour: 'numeric', minute: 'numeric', second: 'numeric',
+				timeZone: 'America/Los_Angeles',
 				timeZoneName: 'short',
 			};
 			var pretty_time = new Intl.DateTimeFormat('en-US', options).format(data['display_rx_time']);

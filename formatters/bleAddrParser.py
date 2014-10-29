@@ -90,7 +90,8 @@ class bleAddrParser ():
                 'e1:59:1e:f2:24:aa': 'Alfred Pennyworth',
                 'df:70:82:56:c1:3e': 'Superman',
                 'e9:2e:38:a2:4a:28': 'Captain Canuck',
-                'f8:e7:72:96:6c:cb': 'Batgirl'
+                'f8:e7:72:96:6c:cb': 'Batgirl',
+                'e2:a7:7f:78:34:24': 'The Halderman'
                 }
 
 	def __init__ (self):

@@ -8,8 +8,8 @@ class bleAddrParser ():
 
         scanner_mapping = {
                 #'mac address': 'some location in Berkeley'
-                '1C:BA:8C:ED:ED:2A': ('test',   0),
-                '78:A5:04:CC:26:B0': ('102', '1')
+                '78:A5:04:CC:26:B0': ('102', '1'),
+                '78:A5:04:DC:83:7C': ('auditorium', '2')
                 }
 
         superhero_mapping = {

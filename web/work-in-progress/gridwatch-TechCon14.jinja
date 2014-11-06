@@ -45,19 +45,30 @@ global-scale view of grid health.
 	padding: 100px 5px 0 50px;
 	margin: 20px auto 20px auto;
 	width:70%;
-	height:200px;
+	height:150px;
+}
+.graph_all_phones {
+	padding: 100px 5px 0 50px;
+	margin: 20px auto 20px auto;
+	width:70%;
+	height:500px;
 }
 .graph_phone {
 	padding: 100px 5px 0 50px;
 	margin: 0px auto 0px auto;
 	width:70%;
-	height:100px;
+	height:60px;
 }
 </style>
 
 <div>
 	<div id="aggregrate" class="graph_aggregate"></div>
 </div>
+<!--
+<div>
+	<div id="all_phones" class="graph_all_phones"></div>
+</div>
+-->
 <div>
 	<div id="phone_1" class="graph_phone"></div>
 </div>
@@ -112,7 +123,7 @@ onload = function() {
 				0,
 				data['time'],
 				data['state_bool'],
-				'red'
+				'black'
 				);
 			agg_graph.update('all');
 	});
@@ -120,7 +131,7 @@ onload = function() {
 	agg_graph = $.grapher($("#aggregrate"),
 		{legend: {show: false, conainer: $("#graph_raw")},
 		 xaxis:  {show:true, width:600000, mode: "time", tickFormatter:x_format},
-		 yaxis:  {min:0, label:"Grid Power", max:1},
+		 yaxis:  {min:0, label:"Grid Power", max:1, ticks:1},
 		 grid:   {margin: {top: 8, bottom: 20, left: 25, right: 25}},
 		});
 
@@ -146,62 +157,102 @@ onload = function() {
 				console.log(data);
 				return;
 			}
+			var color = get_color(data['phone_id'])
 			add_to_graph(
 				phones_graphs[data['phone_id']],
 				0,
 				data['time'],
 				state,
-				'black'
+				color
 				);
 			phones_graphs[data['phone_id']].update('all');
+
+			// Add transparent points to each graph to keep time in sync
+			for (g in phones_graphs) {
+				add_to_graph(
+						phones_graphs[g],
+						1,
+						data['time'],
+						0,
+						"rgba(255, 255, 255, 0)"
+						);
+				phones_graphs[g].update('all');
+			}
+			add_to_graph(agg_graph, 1, data['time'], 0, "rgba(0, 0, 0, 0)");
+			agg_graph.update('all');
+
+			/*
+			var color = get_color(data['phone_id'])
+			add_to_graph(
+					all_phones_graph,
+					data['phone_id'],
+					data['time'],
+					state + 1 + 2*data['phone_id'],
+					color
+					);
+			all_phones_graph.update('all');
+			*/
 	});
 
-	p1 = $.grapher($("#phone_1"),
+	/*
+	all_phones_graph = $.grapher($("#all_phones"),
 		{legend: {show: false, conainer: $("#graph_raw")},
 		 xaxis:  {show:true, width:600000, mode: "time", tickFormatter:x_format},
-		 yaxis:  {min:0, label:"Phone 1", max:1},
+		 yaxis:  {min:0, label:"Phone State", max:18, ticks:18},
+		 grid:   {margin: {top: 8, bottom: 20, left: 25, right: 25}},
+		});
+	*/
+
+	/* NOTE: I couldn't get flot to center the y-axis label for me, so the labels
+	   have non-breaking space characters in them to force them down a little.
+	   To insert these in vim: <C-k> <space> <space>
+	   Sorry for the hack... */
+	p1 = $.grapher($("#phone_1"),
+		{legend: {show: false, conainer: $("#graph_raw")},
+		 xaxis:  {show:false, width:600000, mode: "time", tickFormatter:x_format},
+		 yaxis:  {min:0, label:"P1       ", max:1, ticks:1},
 		 grid:   {margin: {top: 8, bottom: 20, left: 25, right: 25}},
 		});
 	p2 = $.grapher($("#phone_2"),
 		{legend: {show: false, conainer: $("#graph_raw")},
-		 xaxis:  {show:true, width:600000, mode: "time", tickFormatter:x_format},
-		 yaxis:  {min:0, label:"Phone 2", max:1},
+		 xaxis:  {show:false, width:600000, mode: "time", tickFormatter:x_format},
+		 yaxis:  {min:0, label:"P2       ", max:1, ticks:1},
 		 grid:   {margin: {top: 8, bottom: 20, left: 25, right: 25}},
 		});
 	p3 = $.grapher($("#phone_3"),
 		{legend: {show: false, conainer: $("#graph_raw")},
-		 xaxis:  {show:true, width:600000, mode: "time", tickFormatter:x_format},
-		 yaxis:  {min:0, label:"Phone 3", max:1},
+		 xaxis:  {show:false, width:600000, mode: "time", tickFormatter:x_format},
+		 yaxis:  {min:0, label:"P3       ", max:1, ticks:1},
 		 grid:   {margin: {top: 8, bottom: 20, left: 25, right: 25}},
 		});
 	p4 = $.grapher($("#phone_4"),
 		{legend: {show: false, conainer: $("#graph_raw")},
-		 xaxis:  {show:true, width:600000, mode: "time", tickFormatter:x_format},
-		 yaxis:  {min:0, label:"Phone 4", max:1},
+		 xaxis:  {show:false, width:600000, mode: "time", tickFormatter:x_format},
+		 yaxis:  {min:0, label:"P4       ", max:1, ticks:1},
 		 grid:   {margin: {top: 8, bottom: 20, left: 25, right: 25}},
 		});
 	p5 = $.grapher($("#phone_5"),
 		{legend: {show: false, conainer: $("#graph_raw")},
-		 xaxis:  {show:true, width:600000, mode: "time", tickFormatter:x_format},
-		 yaxis:  {min:0, label:"Phone 5", max:1},
+		 xaxis:  {show:false, width:600000, mode: "time", tickFormatter:x_format},
+		 yaxis:  {min:0, label:"P5       ", max:1, ticks:1},
 		 grid:   {margin: {top: 8, bottom: 20, left: 25, right: 25}},
 		});
 	p6 = $.grapher($("#phone_6"),
 		{legend: {show: false, conainer: $("#graph_raw")},
-		 xaxis:  {show:true, width:600000, mode: "time", tickFormatter:x_format},
-		 yaxis:  {min:0, label:"Phone 6", max:1},
+		 xaxis:  {show:false, width:600000, mode: "time", tickFormatter:x_format},
+		 yaxis:  {min:0, label:"P6       ", max:1, ticks:1},
 		 grid:   {margin: {top: 8, bottom: 20, left: 25, right: 25}},
 		});
 	p7 = $.grapher($("#phone_7"),
 		{legend: {show: false, conainer: $("#graph_raw")},
-		 xaxis:  {show:true, width:600000, mode: "time", tickFormatter:x_format},
-		 yaxis:  {min:0, label:"Phone 7", max:1},
+		 xaxis:  {show:false, width:600000, mode: "time", tickFormatter:x_format},
+		 yaxis:  {min:0, label:"P7       ", max:1, ticks:1},
 		 grid:   {margin: {top: 8, bottom: 20, left: 25, right: 25}},
 		});
 	p8 = $.grapher($("#phone_8"),
 		{legend: {show: false, conainer: $("#graph_raw")},
-		 xaxis:  {show:true, width:600000, mode: "time", tickFormatter:x_format},
-		 yaxis:  {min:0, label:"Phone 8", max:1},
+		 xaxis:  {show:false, width:600000, mode: "time", tickFormatter:x_format},
+		 yaxis:  {min:0, label:"P8       ", max:1, ticks:1},
 		 grid:   {margin: {top: 8, bottom: 20, left: 25, right: 25}},
 		});
 	phones_graphs = [p1, p2, p3, p4, p5, p6, p7, p8];

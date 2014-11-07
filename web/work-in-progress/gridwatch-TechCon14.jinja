@@ -117,12 +117,21 @@ onload = function() {
 
 	s2.on('data', function (data) {
 			console.log(data);
+         var data
+         if (data['state_bool'] == "unplugged") {
+             data_adj = -1
+         } else if (data['state_bool'] == "plugged") {
+             data_adj = 1
+         } else 
+             data_adj = 0
+
+         console.log(data)
 
 			add_to_graph(
 				agg_graph,
 				0,
 				data['time'],
-				data['state_bool'],
+				data_adj,
 				'black'
 				);
 			agg_graph.update('all');
@@ -131,7 +140,7 @@ onload = function() {
 	agg_graph = $.grapher($("#aggregrate"),
 		{legend: {show: false, conainer: $("#graph_raw")},
 		 xaxis:  {show:true, width:600000, mode: "time", tickFormatter:x_format},
-		 yaxis:  {min:0, label:"Grid Power", max:1, ticks:1},
+		 yaxis:  {min:-1, label:"Grid Power", max:1, ticks:1},
 		 grid:   {margin: {top: 8, bottom: 20, left: 25, right: 25}},
 		});
 

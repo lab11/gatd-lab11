@@ -37,14 +37,14 @@
             ]
 
             var phone_list = [
-               {'id': 1, 'state': 'on', 'label':'', 'time':''}, 
-               {'id': 2, 'state': 'on', 'label':'', 'time':''}, 
-               {'id': 3, 'state': 'on', 'label':'', 'time':''},
-               {'id': 4, 'state': 'on', 'label':'', 'time':''},
-               {'id': 5, 'state': 'on', 'label':'', 'time':''}, 
-               {'id': 6, 'state': 'on', 'label':'', 'time':''},
-               {'id': 7, 'state': 'on', 'label':'', 'time':''}, 
-               {'id': 8, 'state': 'on', 'label':'', 'time':''} 
+               {'id': 150, 'state': 'on', 'label':'', 'time':''}, 
+               {'id': 151, 'state': 'on', 'label':'', 'time':''}, 
+               {'id': 152, 'state': 'on', 'label':'', 'time':''},
+               {'id': 153, 'state': 'on', 'label':'', 'time':''},
+               {'id': 154, 'state': 'on', 'label':'', 'time':''}, 
+               {'id': 155, 'state': 'on', 'label':'', 'time':''},
+               {'id': 156, 'state': 'on', 'label':'', 'time':''}, 
+               {'id': 157, 'state': 'on', 'label':'', 'time':''} 
             ]
 
             function testOn() {
@@ -63,7 +63,7 @@
 return d['id'] })
                 var enterDiv = phones.enter()
                   enterDiv.append("ellipse")
-                  .attr("cx", function (d) { return d.id*100 + 40; })
+                  .attr("cx", function (d) { return (d.id-149)*100 + 40; })
                   .attr("cy", 550)
                   .attr("rx", 35)
                   .attr("stroke", "black")
@@ -78,8 +78,8 @@ return d['id'] })
                   .attr("ry", 35);
                   
                   enterDiv.append("text")
-                  .attr("x", function(d) { return (d.id*100 + 40)-2; })
-                  .attr("y", function(d) { return 500 })
+                  .attr("x", function(d) { return ((d.id-149)*100 + 27 ); })
+                  .attr("y", 500)
                   .text( function(d) {
                      return d.id })
                   .attr("font-family", "sans-serif")
@@ -87,7 +87,7 @@ return d['id'] })
                   .attr("fill", "gray")
                   
                   enterDiv.append("text")
-                  .attr("x", function(d) { return (d.id*100 + 40)-40; })
+                  .attr("x", function(d) { return ((d.id-149)*100) - 10})
                   .attr("y", function(d) { return 610 })
                   .text( function(d) {
                      return d.label })
@@ -312,12 +312,13 @@ return d['id'] })
                 var cur_id = data['phone_id']
                 if (cur_id >= 150 && cur_id <= 157) {
                    var cur_time = (new Date).getTime()
-                   phone_list[cur_id - 150]['time'] = data['time']
-                   phone_list[cur_id - 150]['label'] = datetime
+                   console.log(cur_id)
+                   phone_list[cur_id-150]['time'] = data['time']
+                   phone_list[cur_id-150]['label'] = datetime
                    if (data['event_type'] == 'unplugged') {
-                      phone_list[cur_id - 150]['state'] = 'off';
+                      phone_list[cur_id-150]['state'] = 'off';
                    } else {
-                      phone_list[cur_id - 150]['state'] = 'on';
+                      phone_list[cur_id-150]['state'] = 'on';
                    }
                }
             }

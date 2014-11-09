@@ -1,0 +1,137 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Mezuri Processing Grid Watch</title>
+
+<script type="text/javascript"
+src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<script src="http://code.highcharts.com/stock/highstock.js"></script>
+<script src="http://code.highcharts.com/modules/exporting.js"></script>
+</head>
+
+<body>
+<p id="loading"></p>
+<div id="container" style="height: 800px; min-width: 310px"></div>
+<script>
+$(function () {
+    $("#loading").text("Loading data, please wait...");
+
+    var NUM_SERIES = 4;
+    var seriesOptions = [];
+    var seriesCounter = 0;
+
+    createChart = function () {
+        console.log("createChart");
+
+        $('#container').highcharts('StockChart', {
+            title : {
+                text : 'Historical Grid Watch Events'
+            },
+
+            yAxis: [{ // Primary yAxis
+                title: {
+                    text: 'Grid Watch with Cluster Size 6',
+                },
+                labels: {
+                    format: 'Power State',
+                },
+                height: '60%'
+                //opposite: true
+
+            }, { // Secondary yAxis
+                //gridLineWidth: 0,
+                title: {
+                    text: 'Grid Watch with Cluster Size 4',
+                },
+                labels: {
+                    format: 'Power State',
+                },
+                top: '65%',
+                height: '35%'
+            }],
+
+            series : seriesOptions
+            });
+
+        $("#loading").text('');
+    }
+
+    event6 = [];
+
+    createEvent6 = function () {
+        console.log("createEvent6");
+        console.log(event6);
+
+        seriesOptions[3] = {
+            name: "Cluster is 6",
+            data: event6,
+            yAxis: 1,
+            tooltip: {
+                    valueDecimals: 1
+            },
+            fillColor : {
+                linearGradient : {
+                    x1: 0,
+                    y1: 0,
+                    x2: 0,
+                    y2: 1
+                },
+                stops : [
+                    [0, Highcharts.getOptions().colors[0]],
+                    [1,
+Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                ]
+            },
+            threshold: null
+        };
+
+        seriesCounter += 1;
+        if (seriesCounter == NUM_SERIES) createChart();
+    }
+
+    parse_date = function (date_str) {
+        return Date.parse(date_str);
+    }
+
+    add_event6_rows = function (data) {
+        rowData = data.rows;
+        rowData.forEach(function (d) {
+              //console.log(d)
+              d.timestamp = d.orderedColumns[1].value
+              var state = d.orderedColumns[0].value
+              console.log(d.timestamp)
+              var state_val = 0
+              if (state == "unplugged") {
+                 state_val = -1
+              } 
+              if (state == "plugged") {
+                 state_val = 1
+              }
+              d.state_val = state_val
+              event6.push(d.timestamp, d.state_val);
+        });
+    }
+
+    event6_callback = function (data) {
+        console.log("event6_callback");
+        console.log(data);
+        add_event6_rows(data);
+        console.log(event6);
+        $("#loading").text($("#loading").text() + " Event 6 loaded " +
+event6.length + " rows,");
+        if (data.hasMoreResults) {
+          $.getJSON('http://146.148.49.96/odktables/mezuri-10100233/tables/taskExecution135gridWatchOutput/ref/uuid:a92bc0ac-16c3-4843-9a7a-7661941cb368/rows'
++ data.webSafeResumeCursor, event6_callback);  
+        } else {
+            createEvent6();
+        }
+    }
+
+    $.getJSON('http://146.148.49.96/odktables/mezuri-10100233/tables/taskExecution135gridWatchOutput/ref/uuid:a92bc0ac-16c3-4843-9a7a-7661941cb368/rows',
+event6_callback);
+
+});
+</script>
+</body>
+</html>

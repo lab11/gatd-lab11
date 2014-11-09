@@ -102,7 +102,6 @@ var GW_PID = 'HthZRrHnlC';
 var GW_CLUSTER_PID = 'jJZ0N2eKmc';
 var s;
 
-onload = function() {
 	s = io.connect('inductor.eecs.umich.edu:8082/stream');
 	s.on('connect', function (data) {
 		s.emit('query', {'profile_id': GW_PID, 'time': 600000}
@@ -268,7 +267,6 @@ onload = function() {
 		});
 	phones_graphs = [p1, p2, p3, p4, p5, p6, p7, p8];
 	phones_power = [true, true, true, true, true, true, true, true];
-}
 
 
 	</script>

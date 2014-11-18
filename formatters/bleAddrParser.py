@@ -17,7 +17,9 @@ class bleAddrParser ():
         #        }
 
         scanner_mapping = {
-                '00:0C:29:73:8A:3C': ('University of Michigan|BBB|4908', '0')
+                '00:0C:29:73:8A:3C': ('University of Michigan|BBB|4908', '0'),
+                '78:A5:04:DC:83:7C': ('University of Michigan|BBB|4901', '1'),
+                'D0:39:72:4B:AD:14': ('University of Michigan|BBB|4670', '2')
                 }
 
         superhero_mapping = {

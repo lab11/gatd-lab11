@@ -219,7 +219,7 @@ the arrow is the distance between the users in meters.
 	}
 
 	onload = function() {
-		socket_loc = io.connect('inductor.eecs.umich.edu:8082/stream');
+		socket_loc = io.connect('gatd.eecs.umich.edu:8082/stream');
 		socket_loc.on('connect', function (data) {
 			socket_loc.emit('query', {'profile_id':       OPO_PID,
 									  '_processor_count': 0

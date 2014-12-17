@@ -5,7 +5,7 @@ var fields = ['cpu_usage', 'disk_usage', 'memory_usage', 'network_sent', 'networ
 
 
 onload = function() {
-	socket = io.connect('inductor.eecs.umich.edu:8080/stream');
+	socket = io.connect('gatd.eecs.umich.edu:8080/stream');
 
 	socket.on('connect', function (data) {
 		var query = {hostname: 'nuclear.eecs.umich.edu'};

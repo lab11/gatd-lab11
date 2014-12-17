@@ -103,10 +103,10 @@ var change = function (nid,next,timeval) {
 }
 onload = function() {
     graphtime = (new Date()).getTime() - GRAPH_SPAN*60*1000;
-    socket = io.connect('inductor.eecs.umich.edu:8082/stream');
+    socket = io.connect('gatd.eecs.umich.edu:8082/stream');
     socket.on('connect', function (data) { socket.emit('query', { 'profile_id': PROFILE_ID, 'time': TIME_SPAN*60*1000, 'id':MOTE_ID}); });
     socket.on('data',    function (data) { convert(data); });
-    // blah = io.connect('inductor.eecs.umich.edu:8082/stream');
+    // blah = io.connect('gatd.eecs.umich.edu:8082/stream');
     // blah.on('connect', function (data) { blah.emit('query', { 'profile_id': PROFILE_ID, 'time': 7*24*60*60*1000, motion: true, 'id':MOTE_ID}); });
     // blah.on('data',    function (data) { lasttime(data); });
     g1 = $.grapher( $('#graph1') , {

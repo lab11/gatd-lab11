@@ -236,7 +236,7 @@ aren't actively demo-ing this system, it will likely not show anything interesti
 	var power_meters = {};
 
 	onload = function() {
-		socket_cc = io.connect('inductor.eecs.umich.edu:8080/stream');
+		socket_cc = io.connect('gatd.eecs.umich.edu:8080/stream');
 		socket_cc.on('connect', function (data) {
 			socket_cc.emit('query', {'$or': [{'$and':[{'profile_id':CC_PID}, {'_processor_freq':'last'}]},
 			                                 {'$and':[{'profile_id':WUP_PID},{'wattsupid':1}]}

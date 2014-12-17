@@ -1,6 +1,6 @@
 
 // Get JSON data
-treeJSON = d3.json("http://inductor.eecs.umich.edu:8085/explore/all", function(error, json) {
+treeJSON = d3.json("http://gatd.eecs.umich.edu:8085/explore/all", function(error, json) {
 
     // Calculate total nodes, max label length
     var totalNodes = 0;
@@ -308,7 +308,7 @@ treeJSON = d3.json("http://inductor.eecs.umich.edu:8085/explore/all", function(e
             $("#stream-box div").empty();
             socket.emit('query', query);
         } else{
-        socket = io.connect('inductor.eecs.umich.edu:8082/stream');
+        socket = io.connect('gatd.eecs.umich.edu:8082/stream');
         socket.on('connect', function (data) {
             socket.emit('query', query);
         });

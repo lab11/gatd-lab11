@@ -57,7 +57,7 @@ var TESSEL_CLIMATE_PID = 'oBNeydOsio';
 var socket_climate;
 
 onload = function() {
-	socket_climate = io.connect('inductor.eecs.umich.edu:8082/stream');
+	socket_climate = io.connect('gatd.eecs.umich.edu:8082/stream');
 	socket_climate.on('connect', function (data) {
 		socket_climate.emit('query', {'profile_id': TESSEL_CLIMATE_PID,
 		                         '_processor_freq':'last',

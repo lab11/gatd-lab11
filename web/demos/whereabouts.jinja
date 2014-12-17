@@ -88,7 +88,7 @@ function data_0() {
 */
 
 onload = function() {
-  socket_cc = io.connect('inductor.eecs.umich.edu:8082/stream');
+  socket_cc = io.connect('gatd.eecs.umich.edu:8082/stream');
   socket_cc.on('connect', function (data) {
       // Queries 30 minutes into the past
       socket_cc.emit('query', {'profile_id': CC_PID,

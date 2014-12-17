@@ -60,7 +60,7 @@ var socket;
 var location_regex = '^USA\\|Michigan\\|Ann Arbor\\|1885 Fuller.*';
 
 onload = function() {
-	socket = io.connect('inductor.eecs.umich.edu:8082/stream');
+	socket = io.connect('gatd.eecs.umich.edu:8082/stream');
 	socket.on('connect', function (data) {
 		socket.emit('query', {'profile_id': TED_PID,
 		                      'gateway_id': '107FF2',

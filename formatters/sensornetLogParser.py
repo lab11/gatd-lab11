@@ -1,6 +1,6 @@
 import parser
 
-class testParser (parser.parser):
+class sensornetLogParser (parser.parser):
 
 	name = 'SensorNet Logger'
 	description = 'Parser for the SensorNet Logging (initially for surveys)'

@@ -17,7 +17,7 @@ class bleAddrParser ():
         #        }
 
         scanner_mapping = {
-                '00:0C:29:73:8A:3C': ('University of Michigan|BBB|4908', '0'),
+                '00:0C:29:CB:0A:60': ('University of Michigan|BBB|4908', '0'),
                 '78:A5:04:DC:83:7C': ('University of Michigan|BBB|4901', '1'),
                 'D0:39:72:4B:AD:14': ('University of Michigan|BBB|4670', '2')
                 }
@@ -114,7 +114,7 @@ class bleAddrParser ():
                 'f4:bb:3c:af:99:6c': ('bpkempke', 'Ben Kempke'),
                 'db:eb:52:c7:90:74': ('sdebruin', 'Sam DeBruin'),
                 'f7:fd:9a:80:91:79': ('genevee', 'Genevieve Flaspohler'),
-                'cb:14:57:58:b4:89': ('cfwelch', 'Charlie Welch'),
+                'dc:fa:65:c7:cd:34': ('cfwelch', 'Charlie Welch'),
                 'de:da:9c:f1:75:94': ('davadria', 'David Adrian'),
                 'cd:49:fa:6a:98:b1': ('None', 'Spare Blue Force'),
                 'ca:2d:39:50:f0:b1': ('ppannuto', 'Pat Pannuto'),

@@ -1,4 +1,4 @@
-{#Name: 4908 Localization#}
+{#Name: Wearabouts#}
 {#Desc: Real-time room-level localization of people.#}
 
 {% extends "base_intro.jinja" %}
@@ -8,15 +8,15 @@
 {% endblock %}
 
 {% block title %}
-Whereabouts
+Wearabouts
 {% endblock %}
 
 {% block page_title %}
-Whereabouts
+Wearabouts
 {% endblock %}
 
 {% block tagline %}
-Semantic Heuristic Localization
+Localization through Wearable Devices
 {% endblock %}
 
 {% block content %}
@@ -33,7 +33,7 @@ Semantic Heuristic Localization
 </div>
 
 <script>
-var CC_PID = 'hsYQx8blbd';
+var CC_PID = '62MTxDGPhJ';
 var socket_cc;
 
 /*
@@ -100,8 +100,10 @@ onload = function() {
   socket_cc.on('data', function (data) {
       //console.log(data['person_list'].toString() + " " +
       //        data['time'] + " " + data['location_str']);
-      record_presence(data['person_list'], data['location_str'], data['time'], data['since_list']);
-      });
+      if ('type' in data && data['type'] == 'room') {
+        record_presence(data['person_list'], data['location_str'], data['time'], data['since_list']);
+      }
+  });
 
     // if testing
     // data_0();

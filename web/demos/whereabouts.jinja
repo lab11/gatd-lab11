@@ -92,7 +92,7 @@ onload = function() {
   socket_cc.on('connect', function (data) {
       // Queries 30 minutes into the past
       socket_cc.emit('query', {'profile_id': CC_PID,
-        'time': 30*60*1000
+        'time': 5*60*1000
         }
         );
       });
@@ -100,7 +100,7 @@ onload = function() {
   socket_cc.on('data', function (data) {
       //console.log(data['person_list'].toString() + " " +
       //        data['time'] + " " + data['location_str']);
-      if ('type' in data && data['type'] == 'room') {
+      if (('type' in data && data['type'] == 'room') && !('experimental' in data)) {
         record_presence(data['person_list'], data['location_str'], data['time'], data['since_list']);
       }
   });

@@ -1,4 +1,4 @@
-{#Name: Opo Playback#}
+{#Name: Opo Simple#}
 {#Desc: Time-accurate replay of human interaction tracking with Opo.#}
 
 
@@ -151,60 +151,64 @@ Opo Playback
   function addRangeEvent (data) {
     id = data['id'];
     last_heard_id = data['last_interaction_partner_id'];
+    if(id < 20 && last_heard_id < 20) {
+        if ('full_name' in data) {
+          name = data['full_name'].split(" ")[0];
+        } else {
+          name = id;
+        }
 
-    if ('full_name' in data) {
-      name = data['full_name'].split(" ")[0];
-    } else {
-      name = id;
+        if ('color' in data) color = data['color'];
+        else color = get_color(id);
+
+        if (!(_.has(people, id))) {
+          people[id] = {};
+          people[id]['color'] = color;
+          people[id]['column'] = num_people;
+          people[id]['name'] = name;
+          num_people++;
+          columns.push(id);
+
+        } else {
+          people[id]['color'] = color;
+          people[id]['name'] = name;
+        }
+
+        // If this packet has a last_heard_id of 0, it means that the opo just
+        //  restarted and this packet is an invalid range
+        if (last_heard_id == 0 || last_heard_id == '0') {
+          return;
+        }
+
+        if (!(_.has(people, last_heard_id))) {
+          people[last_heard_id] = {};
+          people[last_heard_id]['color'] = get_color(last_heard_id);
+          people[last_heard_id]['column'] = num_people;
+          people[last_heard_id]['name'] = last_heard_id;
+          num_people++;
+          columns.push(last_heard_id);
+        }
+
+        if (_.has(dedup, (last_heard_id + '|' + id))) {
+          if (dedup[last_heard_id + '|' + id] == data['last_unixtime']) {
+            return;
+          }
+        }
+        dedup[last_heard_id + '|' + id] = data['last_unixtime'];
+
+        if( Math.round(data['last_range_dt'] / 32000.0 * 343.2) - .12 > 0 && data['id'] < 20 && data['last_interaction_partner_id'] < 20 ) {
+          ranges.push([last_heard_id, id, new Date(data['last_unixtime']*1000), Math.round(data['last_range_dt'] / 32000.0 * 343.2) - .12]);
+        }
+        else {
+          console.log("FUUCCCKKK" + JSON.stringify(data))
+        }
+        draw();
+
     }
 
-    if ('color' in data) color = data['color'];
-    else color = get_color(id);
-
-    if (!(_.has(people, id))) {
-      people[id] = {};
-      people[id]['color'] = color;
-      people[id]['column'] = num_people;
-      people[id]['name'] = name;
-      num_people++;
-      columns.push(id);
-
-    } else {
-      people[id]['color'] = color;
-      people[id]['name'] = name;
-    }
-
-    // If this packet has a last_heard_id of 0, it means that the opo just
-    //  restarted and this packet is an invalid range
-    if (last_heard_id == 0 || last_heard_id == '0') {
-      return;
-    }
-
-    if (!(_.has(people, last_heard_id))) {
-      people[last_heard_id] = {};
-      people[last_heard_id]['color'] = get_color(last_heard_id);
-      people[last_heard_id]['column'] = num_people;
-      people[last_heard_id]['name'] = last_heard_id;
-      num_people++;
-      columns.push(last_heard_id);
-    }
-
-    if (_.has(dedup, (last_heard_id + '|' + id))) {
-      if (dedup[last_heard_id + '|' + id] == data['last_unixtime']) {
-        return;
-      }
-    }
-    dedup[last_heard_id + '|' + id] = data['last_unixtime'];
-
-    if( Math.round(data['last_range_dt'] / 32000.0 * 343.2) - .12 > 0 && data['id'] < 20 && data['last_interaction_partner_id'] < 20 ) {
-      ranges.push([last_heard_id, id, new Date(data['last_unixtime']*1000), Math.round(data['last_range_dt'] / 32000.0 * 343.2) - .12]);
-    }
-    else {
-      console.log("FUUCCCKKK" + JSON.stringify(data))
-    }
 
 
-    draw();
+
   }
 
   var wsocket = new WebSocket('ws://websocket.gatd.io/daae1807-f26b-4737-b37f-b781db47c5ef')

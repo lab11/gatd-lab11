@@ -141,8 +141,8 @@ Opo Playback
 
       draw_circle(context, x1, y, 10, people[last_heard_id]['color']);
       draw_circle(context, x2, y, 10, people[id]['color']);
-      console.log("timestamp_raw", timestamp.toString())
-      console.log("timestamp", moment(timestamp).format('MM-YYYY'))
+      //console.log("timestamp_raw", timestamp.toString())
+      //console.log("timestamp", moment(timestamp).format('MM-YYYY'))
       draw_text(context, moment(timestamp).format('MM-DD-YYYY, HH:mm'), 10, y, 'left');
       draw_text(context, range, (x1+x2)/2, y-1, 'center');
     }
@@ -196,7 +196,13 @@ Opo Playback
     }
     dedup[last_heard_id + '|' + id] = data['last_unixtime'];
 
-    ranges.push([last_heard_id, id, new Date(data['last_unixtime']*1000), Math.round(data['laste_range_dt'] / 32000.0 * 343.2) - .12]);
+    if( Math.round(data['last_range_dt'] / 32000.0 * 343.2) - .12 > 0 && data['id'] < 20 && data['last_interaction_partner_id'] < 20 ) {
+      ranges.push([last_heard_id, id, new Date(data['last_unixtime']*1000), Math.round(data['last_range_dt'] / 32000.0 * 343.2) - .12]);
+    }
+    else {
+      console.log("FUUCCCKKK" + JSON.stringify(data))
+    }
+
 
     draw();
   }
@@ -205,12 +211,13 @@ Opo Playback
 
   wsocket.onopen = function() {
     console.log("Connected");
-    wsocket.send(JSON.stringify({ last_unixtime : {$gte : (new Date).getTime() - 60000 } }));
+    wsocket.send(JSON.stringify({ last_unixtime : {$gt : (new Date).getTime()/1000 - 60 } }));
+    //wsocket.send(JSON.stringify({}))
   }
 
   wsocket.onmessage = function(e) {
-    console.log("got data")
-    console.log(JSON.parse(e.data))
+    //console.log("got data")
+    //console.log(JSON.parse(e.data))
     addRangeEvent(JSON.parse(e.data))
   }
 

@@ -1,0 +1,351 @@
+{#Name: Opo Points#}
+{#Desc: Scientifically Valid Meow Meow Beans#}
+
+
+{% extends "base.jinja" %}
+
+{% block includes %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="bower_components/moment/moment.js"> </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
+<script src="/js/d3-hive.js"></script>
+{% endblock %}
+
+{% block title %}
+Opo Points
+{% endblock %}
+
+{% block page_title %}
+Opo Points
+{% endblock %}
+
+{% block body %}
+<style type="text/css">
+#leaderboard_title {
+  position: absolute;
+  top:5px;
+  left:50%;
+  min-width: 100px;
+  width: 30%;
+  border: 3px solid #699CC6;
+  background-color: #fff;
+  margin-left: -15%;
+  text-align: center;
+  color: #111;
+  height: 75px;
+  z-index: 1500;
+  font-size: 200%;
+  vertical-align: center;
+  padding-top: 25px;
+  /*border-radius: 15px;*/
+}
+.node circle {
+  stroke: #000;
+}
+
+.node circle.active {
+  stroke: red;
+  stroke-width: 2px;
+  stroke-opacity: 1;
+}
+
+.link {
+  fill: none;
+  stroke-opacity: .3;
+  stroke-width: 1.5px;
+  stroke: purple;
+}
+
+.link.active {
+  stroke-opacity: 1;
+  stroke-width: 4px;
+}
+
+.axis {
+  stroke-width: 2px;
+}
+
+.axis-labels {
+  font-size: 100%;
+  color: #111;
+}
+
+.link-detail, .link-date {
+  font-size: 100%;
+  color: #111;
+  fill-opacity: 0;
+  stroke-opacity: 0;
+}
+
+.link-detail.active, .link-date.active {
+  stroke-opacity: 1;
+  fill-opacity: 1;
+}
+
+</style>
+
+<div id="opo-points" style="text-align:center;"></div>
+
+<script>
+var margin = {top: 60, right: 60, bottom: 60, left: 60}
+var width = document.documentElement.clientWidth - margin.left - margin.right
+var height = document.documentElement.clientHeight - margin.top - margin.bottom
+//width > height ? width=height : height= width
+
+var innerRadius = 40
+var outerRadius = (width < height ? width : height) / 2 - 120
+var angleSeparation = Math.PI / 3
+
+var hiveOffset = 50
+var nodePosition = d3.scale.linear()
+                    .rangeRound([innerRadius, outerRadius])
+var color = d3.scale.category10();
+var unixWeek = 604800
+var maxCount = 0
+
+var idMapper = {
+    1: "Will",
+    2: "Canadian",
+    3: "Pat",
+    4: "Brad",
+    5: "Noah",
+    6: "YeSheng"
+}
+
+var aggregatePoints = {
+    1: 0,
+    2: 0,
+    3: 0,
+    4: 0,
+    5: 0,
+    6: 0
+}
+
+var weekData
+
+var nodes = []
+var links = []
+
+// Set up d3 SVG
+var svg = d3.select("#opo-points").append("svg")
+  .attr("class", "leaderboard-svg")
+  .attr("width", width)
+  .attr("height", height)
+
+svg.append("text")
+   .attr("class", "opo-points-title")
+   .attr("x", width/2)
+   .attr("y", 30)
+   .attr("text-anchor", "middle")
+   .style("font-size", "36px")
+   .text("Objective Meow Meow Beans");
+
+svg.selectAll(".axis")
+    .data(d3.range(1,7))
+  .enter().append("line")
+    .attr("id", function(d) {return d})
+    .attr("class", "axis")
+    .attr("stroke", function(d){ return color(d) })
+    .attr("x1", width/2 + innerRadius)
+    .attr("x2", width/2 + outerRadius)
+    .attr("y1", height/2 + hiveOffset)
+    .attr("y2", height/2 + hiveOffset)
+    .attr("transform", function(d) { return "rotate(" + degrees(angleSeparation * d) + "," + width/2 + "," + (height/2 + hiveOffset) + ")"; });
+
+svg.selectAll(".axis-labels")
+  .data(d3.range(1,7)).enter().append("text")
+    .text(function (d) {return idMapper[d]})
+    .attr("class", "axis-labels")
+    //.attr("x", width/2 + outerRadius + 20)
+    //.attr("y", height/2 + hiveOffset)
+    .attr("transform", function(d) {
+      var r = degrees(angleSeparation * d)
+      var t = "rotate(" + r + "," + width/2 + "," + (height/2 + hiveOffset) + ")"
+      t += ",translate(" + (width/2 + outerRadius + 20) + "," + (height/2 + hiveOffset) + ")"
+      if(r > 90) {t += ",rotate(180)"}
+      return t})
+    .attr("text-anchor", function(d) {
+      if(degrees(angleSeparation * d) > 90) {return "end"}
+      return "start"})
+
+svg.selectAll(".interaction-numbers")
+  .data(d3.range(1,7)).enter().append("text")
+    .attr("class", "interaction-numbers")
+    .attr("transform", function(d) {
+      var r = degrees(angleSeparation * d)
+      var t = "rotate(" + r + "," + width/2 + "," + (height/2 + hiveOffset) + ")"
+      t += ",translate(" + (width/2 + outerRadius + 20) + "," + (height/2 + hiveOffset) + ")"
+      if(r > 90) {t += ",rotate(180)"}
+      t += ",translate(0,30)"
+      return t})
+    .attr("text-anchor", function(d) {
+      if(degrees(angleSeparation * d) > 90) {return "end"}
+      return "start"})
+    .text("0")
+
+svg.append("text")
+  .attr("class", "link-detail")
+  .attr("x", width/2)
+  .attr("y", height/2 + hiveOffset - 5)
+  .attr("text-anchor", "middle")
+
+svg.append("text")
+  .attr("class", "link-date")
+  .attr("x", width/2)
+  .attr("y", height/2 + hiveOffset + 10)
+  .attr("text-anchor", "middle")
+
+function updatePoints(data) {
+    /* Set our timeframe to the last week */
+    var endTime = (new Date).getTime()/1000
+    var startTime = endTime - (1 * unixWeek)
+    nodePosition.domain([startTime, endTime])
+
+    updateLinkAndNodeLocations()
+
+    data.numInteractions = 1
+    data.position = Math.round(nodePosition(data.m_unixtime)/15) * 15
+    addLink(data)
+
+    nodes = nodes.filter(function(n) {return n['m_unixtime'] >= startTime && n["m_unixtime"] <= endTime})
+    links = links.filter(function(n) {
+        if (n['m_unixtime'] >= startTime && n["m_unixtime"] <= endTime) {return true}
+        else {
+          aggregatePoints[n.rx_id] -= 1
+          return false;
+        }
+      })
+
+    svg.selectAll(".interaction-numbers").data(d3.range(1,7))
+      .text(function(d) {
+        return aggregatePoints[d]})
+
+    var interaction_nodes = svg.selectAll(".node")
+        .data(nodes)
+
+    /* Update existing nodes */
+    interaction_nodes.transition()
+      .duration(100)
+      .attr("cx", function(d) {return width/2 + d.position})
+      .attr("cy", height/2 + hiveOffset)
+
+    /* Add new nodes */
+    interaction_nodes.enter()
+      .append("circle")
+        .attr("class", "node")
+        .attr("cx", function(d) {return width/2 + d.position})
+        .attr("cy", height/2 + hiveOffset)
+        .attr("transform", function(d) {return "rotate(" + degrees(angleSeparation * d.m_id) + "," + width/2 + "," + (height/2 + hiveOffset) + ")"})
+        .attr("r", 5)
+        .style("fill-opacity", 1)
+        .style("fill", function(d) {return color(d.m_id)})
+        .on("mouseover", nodeMouseOver)
+        .on("mouseout", mouseOut)
+
+    /* Remove expired nodes */
+    interaction_nodes.exit()
+      .transition()
+        .duration(100)
+        .style("fill-opacity", 0)
+        .remove()
+
+    var interaction_links = svg.selectAll(".link")
+      .data(links)
+
+    interaction_links.transition()
+      .duration(100)
+      .attr("d", d3.hive.link()
+                      .angle(function(d) {return angleSeparation * d.m_id})
+                      .radius(function(d) {return d.position}))
+
+    interaction_links.enter()
+      .append("path")
+        .attr("class", "link")
+        .attr("transform", "translate(" + (width/2) + "," + (height/2 + hiveOffset) + ")")
+        .attr("d", d3.hive.link()
+                        .angle(function(d) {return angleSeparation * d.m_id})
+                        .radius(function(d) {return d.position}))
+        .style("stroke", function(d) {return color(d.tx_id)})
+}
+
+function updateLinkAndNodeLocations() {
+    for(var i = 0; i < links.length; i++) {
+        var n = links[i]
+        n.position = Math.round(nodePosition(n.m_unixtime)/15) * 15
+    }
+    for(var i = 0; i < nodes.length; i++) {
+      var n = nodes[i]
+      n.position = Math.round(nodePosition(n.m_unixtime)/15) * 15
+    }
+}
+
+function addLink(e) {
+    for(var i = 0; i< links.length; i++) {
+        var n = links[i]
+        if(n.rx_id == e.rx_id && n.tx_id == e.tx_id && n.position == e.position) {
+            n.numInteractions += 1
+            aggregatePoints[e.rx_id] += 1
+            return
+        }
+    }
+    var i1 = {m_id: e.rx_id, o_id: e.tx_id, m_unixtime: e.m_unixtime, position: e.position}
+    var i2 = {m_id: e.tx_id, o_id: e.rx_id, m_unixtime: e.m_unixtime, position: e.position}
+    e.source = i1
+    e.target = i2
+    nodes.push(i1)
+    nodes.push(i2)
+    links.push(e)
+    aggregatePoints[e.rx_id] += 1
+}
+
+/* On node mouseover, highlight the node and any links going to or from the node */
+function nodeMouseOver(d) {
+  svg.selectAll(".link").classed("active", function(p) {
+    if(p.source === d || p.target === d) {
+      svg.selectAll(".link-detail")
+        .classed("active", true)
+        .text("Interactions: " + p.numInteractions)
+      svg.selectAll(".link-date")
+        .classed("active", true)
+        .text(moment.unix(p.m_unixtime).fromNow())
+    }
+    return p.source === d || p.target === d
+  })
+  d3.select(this).classed("active", true)
+}
+
+function linkMouseOver(d) {
+  svg.selectAll(".link").classed("active", function(p) {return p === d})
+  svg.selectAll(".node circle")
+}
+
+function mouseOut() {
+  svg.selectAll(".active").classed("active", false)
+}
+
+function degrees(radians) {
+  return radians / Math.PI * 180 - 90
+}
+
+var wsocket = new WebSocket('ws://websocket.gatd.io/f7894eb4-d12b-467b-bad2-9856beee7420')
+wsocket.onopen = function() {
+  wsocket.send(JSON.stringify({ $and: [{m_unixtime : {$gt : (new Date).getTime()/1000 - (1 * unixWeek)}},
+                                         {m_unixtime : {$lt : (new Date).getTime()/1000 + 100}}]}));
+}
+
+wsocket.onmessage = function(e) {
+  //maxCount += 1
+  //if(maxCount < 100) {
+    updatePoints(JSON.parse(e.data))
+  //}
+}
+
+wsocket.onclose = function() {
+  console.log("closed")
+  setTimeout(function() {wsocket = new WebSocket('ws://websocket.gatd.io/daae1807-f26b-4737-b37f-b781db47c5ef')}, 10 * 10000)
+  console.log("reoponed?")
+}
+
+</script>
+
+{% endblock %}

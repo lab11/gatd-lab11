@@ -1,0 +1,248 @@
+{#Name: Opo Point Bubbles#}
+{#Desc: Scientifically Valid Meow Meow Beans#}
+
+
+{% extends "base.jinja" %}
+
+{% block includes %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="bower_components/moment/moment.js"> </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
+<script src="/js/d3-hive.js"></script>
+{% endblock %}
+
+{% block title %}
+Opo Point Bubbles
+{% endblock %}
+
+{% block page_title %}
+Opo Point Bubbles
+{% endblock %}
+
+{% block body %}
+<style type="text/css">
+#leaderboard_title {
+  position: absolute;
+  top:5px;
+  left:50%;
+  min-width: 100px;
+  width: 30%;
+  border: 3px solid #699CC6;
+  background-color: #fff;
+  margin-left: -15%;
+  text-align: center;
+  color: #111;
+  height: 75px;
+  z-index: 1500;
+  font-size: 200%;
+  vertical-align: center;
+  padding-top: 25px;
+  /*border-radius: 15px;*/
+}
+.node circle {
+  stroke: #000;
+  stroke-width: 0;
+}
+
+.node circle.active {
+  stroke: red;
+  stroke-width: 2px;
+  stroke-opacity: 1;
+}
+
+.link {
+  fill: none;
+  stroke-opacity: .3;
+  stroke-width: 1.5px;
+  stroke: purple;
+}
+
+.link.active {
+  stroke-opacity: 1;
+  stroke-width: 4px;
+}
+
+.axis {
+  stroke-width: 2px;
+}
+
+.axis-labels {
+  font-size: 100%;
+  color: #111;
+}
+
+.link-detail, .link-date {
+  font-size: 100%;
+  color: #111;
+  fill-opacity: 0;
+  stroke-opacity: 0;
+}
+
+.link-detail.active, .link-date.active {
+  stroke-opacity: 1;
+  fill-opacity: 1;
+}
+
+</style>
+
+<div id="opo-bubbles" style="text-align:center;"></div>
+
+<script>
+
+var idMapper = {
+    1: "Will",
+    2: "Branden",
+    3: "Pat",
+    4: "Brad",
+    5: "Noah",
+    6: "YeSheng"
+};
+
+var bubble_data = {
+  children: [
+    {
+      packageName: 'Will',
+      className: 'Will',
+      value: 0
+    },
+    {
+      packageName: 'Branden',
+      className: 'Branden',
+      value: 0
+    },
+    {
+      packageName: 'Pat',
+      className: 'Pat',
+      value: 0
+    },
+    {
+      packageName: 'Brad',
+      className: 'Brad',
+      value: 0
+    },
+    {
+      packageName: 'Noah',
+      className: 'Noah',
+      value: 0
+    },
+    {
+      packageName: 'YeSheng',
+      className: 'YeSheng',
+      value: 0
+    },
+  ]
+};
+
+
+
+var diameter = 960;
+var format = d3.format(",d");
+var color = d3.scale.category10();
+
+var bubble = d3.layout.pack()
+    .sort(null)
+    .size([diameter, diameter])
+    .padding(1.5);
+
+var svg = d3.select("#opo-bubbles").append("svg")
+    .attr("width", diameter)
+    .attr("height", diameter)
+    .attr("class", "bubble");
+
+
+
+
+function change_bubble (ddd) {
+    var node = svg.selectAll(".node")
+        .data(
+            bubble.nodes(ddd).filter(function (d){return !d.children;}),
+            function(d) {return d.className} // key data based on className to keep object constancy
+        );
+
+    // capture the enter selection
+    var nodeEnter = node.enter()
+        .append("g")
+        .attr("class", "node")
+        .attr("transform", function (d) {
+            return "translate(" + d.x + "," + d.y + ")";
+        });
+
+    // re-use enter selection for circles
+    nodeEnter
+        .append("circle")
+        .attr("r", function (d) {return d.r;})
+        .style("fill", function (d, i) {return color(i);})
+
+    // re-use enter selection for titles
+    nodeEnter
+        .append("title")
+        .text(function (d) {
+            return d.className + ": " + format(d.value);
+        });
+
+    nodeEnter.append("text")
+      .attr("dy", ".3em")
+      .attr('class', 'person-name')
+      .style("text-anchor", "middle")
+      .text(function(d) { return d.className; });
+
+    node.select("circle")
+        .transition().duration(1000)
+        .attr("r", function (d) {
+            return d.r;
+        })
+        .style("fill", function (d, i) {
+            return color(i);
+        });
+
+    node.select('.person-name')
+      .text(function (d) {
+        return d.className + ': ' + d.value
+      });
+
+    node.transition().attr("class", "node")
+        .attr("transform", function (d) {
+        return "translate(" + d.x + "," + d.y + ")";
+    });
+
+    node.exit().remove();
+}
+
+var unixWeek = 604800;
+
+function update_points (data) {
+
+  // Person who received a range and gets the point for this range.
+  var receiver_id = data.rx_id;
+
+  // Increment their count
+  bubble_data.children[receiver_id-1].value++;
+
+  change_bubble(bubble_data);
+}
+
+// Do initial load
+change_bubble(bubble_data);
+
+var wsocket = new WebSocket('ws://websocket.gatd.io/f7894eb4-d12b-467b-bad2-9856beee7420')
+wsocket.onopen = function () {
+  wsocket.send(JSON.stringify({ $and: [{m_unixtime : {$gt : (new Date).getTime()/1000 - (1 * unixWeek)}},
+                                         {m_unixtime : {$lt : (new Date).getTime()/1000 + 100}}]}));
+}
+
+wsocket.onmessage = function (e) {
+  update_points(JSON.parse(e.data));
+}
+
+wsocket.onclose = function () {
+  console.log("closed")
+  setTimeout(function () {
+    console.log("reoponed?");
+    wsocket = new WebSocket('ws://websocket.gatd.io/daae1807-f26b-4737-b37f-b781db47c5ef')
+  }, 100);
+}
+
+
+</script>
+
+{% endblock %}

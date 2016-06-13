@@ -137,6 +137,18 @@ var s;
 				'black'
 				);
 		   	agg_graph.update('all');
+
+			// Add transparent points to each graph to keep time in sync
+			for (g in phones_graphs) {
+				add_to_graph(
+						phones_graphs[g],
+						1,
+						data['time'],
+						0,
+						"rgba(255, 255, 255, 0)"
+						);
+				phones_graphs[g].update('all');
+			}
          }
 	});
 
@@ -175,7 +187,7 @@ var s;
 			add_to_graph(
 				phones_graphs[data['phone_id']],
 				0,
-				data['time'],
+				data['time']+1100,
 				state,
 				color
 				);
@@ -186,7 +198,7 @@ var s;
 				add_to_graph(
 						phones_graphs[g],
 						1,
-						data['time'],
+						data['time']+1100,
 						0,
 						"rgba(255, 255, 255, 0)"
 						);
